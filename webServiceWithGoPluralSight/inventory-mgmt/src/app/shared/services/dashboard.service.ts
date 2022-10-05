@@ -3,7 +3,7 @@ import { Subject } from "rxjs";
 import { map } from 'rxjs/operators';
 import { WebsocketService } from "./websocket.service";
 
-const API_URL = "ws://localhost:5000/websocket";
+const API_URL = "ws://localhost:5005/websocket";
 
 @Injectable({
   providedIn: 'root'

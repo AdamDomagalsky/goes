@@ -8,7 +8,7 @@ import { IReceipt } from '../models/receipt.model';
 })
 export class ReceiptService {
   
-  API_URL: string = "http://localhost:5000";
+  API_URL: string = "http://localhost:5005";
   
   private receiptsUri = '/api/receipts';
   constructor(private http: HttpClient) { }
