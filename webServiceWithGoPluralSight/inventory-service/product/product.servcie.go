@@ -31,7 +31,11 @@ func productHandler(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusNotFound)
 		return
 	}
-	product := getProductByID(productID)
+	product, err := getProductByID(productID)
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	if product == nil {
 		writer.WriteHeader(http.StatusNotFound)
 		return
@@ -64,7 +68,7 @@ func productHandler(writer http.ResponseWriter, request *http.Request) {
 			writer.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		_, err = addOrUpdateProduct(updatedProduct)
+		err = updateProduct(updatedProduct)
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
@@ -72,7 +76,11 @@ func productHandler(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusOK)
 		return
 	case http.MethodDelete:
-		removeProductByid(productID)
+		err := removeProductByid(productID)
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	case http.MethodOptions:
 		return // cors.Middleware handles the logic for us
 	default:
@@ -84,7 +92,11 @@ func productsHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		productList := getProductList()
+		productList, err := getProductList()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		productsJson, err := json.Marshal(productList)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -109,7 +121,7 @@ func productsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, err = addOrUpdateProduct(newProduct)
+		_, err = insertProduct(newProduct)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
