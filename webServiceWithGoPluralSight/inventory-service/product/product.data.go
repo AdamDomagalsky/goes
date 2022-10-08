@@ -1,13 +1,17 @@
 package product
 
 import (
+	"context"
 	"database/sql"
+	"time"
 
 	"goes/webServiceWithGoPluralSight/database"
 )
 
 func getProductByID(id int) (*Product, error) {
-	row := database.DbConn.QueryRow(`SELECT productId, 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	row := database.DbConn.QueryRowContext(ctx, `SELECT productId, 
        	manufacturer,
        	sku,
        	upc,
@@ -35,7 +39,9 @@ func getProductByID(id int) (*Product, error) {
 }
 
 func removeProductByid(id int) error {
-	_, err := database.DbConn.Query(`DELETE FROM products WHERE productId = ?`, id)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	_, err := database.DbConn.QueryContext(ctx, `DELETE FROM products WHERE productId = ?`, id)
 	if err != nil {
 		return err
 	}
@@ -43,7 +49,9 @@ func removeProductByid(id int) error {
 }
 
 func getProductList() ([]Product, error) {
-	results, err := database.DbConn.Query(`SELECT productId, 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	results, err := database.DbConn.QueryContext(ctx, `SELECT productId, 
        	manufacturer,
        	sku,
        	upc,
@@ -76,7 +84,9 @@ func getProductList() ([]Product, error) {
 }
 
 func updateProduct(product Product) error {
-	_, err := database.DbConn.Exec(`
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	_, err := database.DbConn.ExecContext(ctx, `
 	UPDATE products SET
 	manufacturer=?,
 	sku=?,
@@ -99,8 +109,12 @@ func updateProduct(product Product) error {
 }
 
 func insertProduct(product Product) (int, error) {
-	result, err := database.DbConn.Exec(`
-	INSERT INTO products (manufacturer, sku, upc, pricePerUnit, quantityOnHand, productName) VALUES (?,?,?,?,?,?)`,
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	result, err := database.DbConn.ExecContext(ctx,
+		`	INSERT INTO products
+	    	(manufacturer, sku, upc, pricePerUnit, quantityOnHand, productName)
+		VALUES (?,?,?,?,?,?)`,
 		product.Manufacturer,
 		product.Sku,
 		product.Upc,
