@@ -15,14 +15,16 @@ import (
 const productsPath = "products"
 
 func SetupRoute(apiBasePath string) {
-	handleProducts := http.HandlerFunc(productsHandler)
-	handleProduct := http.HandlerFunc(productHandler)
+	productsHandler := http.HandlerFunc(handleProducts)
+	productHandler := http.HandlerFunc(handleProduct)
+	reportHandler := http.HandlerFunc(handleProductReport)
 	http.Handle("/websocket", websocket.Handler(productSocket))
-	http.Handle(fmt.Sprintf("%s/%s", apiBasePath, productsPath), cors.Middleware(handleProducts))
-	http.Handle(fmt.Sprintf("%s/%s/", apiBasePath, productsPath), cors.Middleware(handleProduct))
-
+	http.Handle(fmt.Sprintf("%s/%s", apiBasePath, productsPath), cors.Middleware(productsHandler))
+	http.Handle(fmt.Sprintf("%s/%s/", apiBasePath, productsPath), cors.Middleware(productHandler))
+	http.Handle(fmt.Sprintf("%s/%s/reports", apiBasePath, productsPath), cors.Middleware(reportHandler))
 }
-func productHandler(writer http.ResponseWriter, request *http.Request) {
+
+func handleProduct(writer http.ResponseWriter, request *http.Request) {
 	urlPathSegments := strings.Split(request.URL.Path, fmt.Sprintf("%s/", productsPath))
 	if len(urlPathSegments[1:]) > 1 {
 		writer.WriteHeader(http.StatusBadRequest)
@@ -90,7 +92,7 @@ func productHandler(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func productsHandler(w http.ResponseWriter, r *http.Request) {
+func handleProducts(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
