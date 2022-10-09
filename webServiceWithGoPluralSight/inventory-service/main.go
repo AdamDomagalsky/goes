@@ -16,5 +16,5 @@ func main() {
 	database.SetupDatabase()
 	product.SetupRoute(apiBasePath)
 	receipt.SetupRoute(apiBasePath)
-	log.Fatalln(http.ListenAndServe(":5005", nil))
+	log.Fatalln(http.ListenAndServe(":5005", nil)) // Go uses the DefaultServeMux to handle incoming requests.
 }
