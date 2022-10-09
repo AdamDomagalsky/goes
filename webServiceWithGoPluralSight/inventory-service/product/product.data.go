@@ -184,9 +184,11 @@ func searchForProductData(filter ProductReportFilter) ([]Product, error) {
 	quantityOnHand,
 	LOWER(productName)
 	FROM products WHERE `)
+	emptyFilters := true
 	if filter.NameFilter != "" {
 		queryBuilder.WriteString(`productName LIKE ?`)
 		queryArgs = append(queryArgs, "%"+strings.ToLower(filter.NameFilter)+"%")
+		emptyFilters = false
 	}
 	if filter.ManufacturerFilter != "" {
 		if len(queryArgs) > 0 {
@@ -195,6 +197,7 @@ func searchForProductData(filter ProductReportFilter) ([]Product, error) {
 		}
 		queryBuilder.WriteString(`manufacturer LIKE ?`)
 		queryArgs = append(queryArgs, "%"+strings.ToLower(filter.ManufacturerFilter)+"%")
+		emptyFilters = false
 	}
 	if filter.SKUFilter != "" {
 		if len(queryArgs) > 0 {
@@ -203,8 +206,14 @@ func searchForProductData(filter ProductReportFilter) ([]Product, error) {
 		}
 		queryBuilder.WriteString(`sku LIKE ?`)
 		queryArgs = append(queryArgs, "%"+strings.ToLower(filter.SKUFilter)+"%")
+		emptyFilters = false
 	}
-	results, err := database.DbConn.QueryContext(ctx, queryBuilder.String(), queryArgs...)
+	builtQuery := queryBuilder.String()
+	if emptyFilters == true {
+		builtQuery = strings.TrimRight(builtQuery, " WHERE ")
+	}
+
+	results, err := database.DbConn.QueryContext(ctx, builtQuery, queryArgs...)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, err
