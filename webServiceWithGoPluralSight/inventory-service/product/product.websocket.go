@@ -35,7 +35,11 @@ func productSocket(ws *websocket.Conn) {
 		close(done)
 	}(ws)
 
-	var top10productsCache []Product
+	top10productsCache, err := GetTop10Products()
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	for {
 		select {
 		case <-done:
@@ -44,6 +48,10 @@ func productSocket(ws *websocket.Conn) {
 		case t := <-ticker.C:
 			fmt.Println("Tick at", t)
 			newProducts, err := GetTop10Products()
+			if err != nil {
+				log.Println(err)
+				return
+			}
 			if reflect.DeepEqual(top10productsCache, newProducts) {
 				fmt.Println("nothing new with top10Products")
 				continue
@@ -51,13 +59,10 @@ func productSocket(ws *websocket.Conn) {
 				fmt.Println("got something new...saving to cache and sending via ws")
 				top10productsCache = newProducts
 			}
-			if err != nil {
-				log.Println(err)
-				break
-			}
+
 			if err := websocket.JSON.Send(ws, top10productsCache); err != nil {
 				log.Println(err)
-				break
+				return
 			}
 		}
 	}
