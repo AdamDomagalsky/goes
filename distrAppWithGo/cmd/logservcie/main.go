@@ -6,13 +6,18 @@ import (
 	stlog "log"
 
 	"goes/distrAppWithGo/log"
+	"goes/distrAppWithGo/registry"
 	"goes/distrAppWithGo/service"
 )
 
 func main() {
 	log.Run("./app.log")
 	host, port := "localhost", "4000"
-	ctx, err := service.Start(context.Background(), "Log Service", host, port, log.RegisterHandlers)
+	serviceAddress := fmt.Sprintf("http://%v:%v", host, port)
+	var r registry.Registration
+	r.ServiceName = registry.LogService
+	r.ServiceURL = serviceAddress
+	ctx, err := service.Start(context.Background(), host, port, r, log.RegisterHandlers)
 	if err != nil {
 		stlog.Fatal(err)
 	}
