@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 )
 
 const ServerPort = ":3000"
@@ -44,7 +45,8 @@ func (r *registry) sendRequiredServices(reg Registration) error {
 			if serviceReg.ServiceName == reqService {
 				p.Added = append(p.Added, patchEntry{
 					Name: serviceReg.ServiceName,
-					URL:  serviceReg.ServiceUpdateURL,
+					URL:  serviceReg.ServiceURL,
+					//URL:  serviceReg.ServiceUpdateURL,
 				})
 			}
 		}
@@ -168,4 +170,45 @@ func (s RegistryService) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
+}
+func (r *registry) heartbeat(freq time.Duration) {
+	// TODO should use a ticker with select channel
+	for {
+		var wg sync.WaitGroup
+		for _, registration := range r.registrations {
+			wg.Add(1)
+			go func(reg Registration) {
+				defer wg.Done()
+				success := true
+				for attempts := 0; attempts < 3; attempts++ {
+					res, err := http.Get(reg.HeartbeatURL)
+					if err != nil {
+						log.Println(err)
+					} else if res.StatusCode == http.StatusOK {
+						log.Printf("heartbeat check passed for %v\n", reg.ServiceName)
+						if !success {
+							r.add(reg)
+						}
+						break
+					}
+					log.Printf("heartbeat check failed for %v\n", reg.ServiceName)
+					if success {
+						success = false
+						r.remove(reg.ServiceURL)
+					}
+					time.Sleep(1 * time.Second)
+				}
+			}(registration)
+			wg.Wait()
+			time.Sleep(freq)
+		}
+	}
+}
+
+var once sync.Once
+
+func SetupRegistryService() {
+	once.Do(func() {
+		go reg.heartbeat(3 * time.Second)
+	})
 }
