@@ -1,0 +1,4 @@
+mode: set
+goes/10-2022/gotesting/messages/messages.go:5.32,7.2 1 1
+goes/10-2022/gotesting/messages/messages.go:9.33,11.2 1 1
+goes/10-2022/gotesting/messages/messages.go:13.28,16.2 1 0
