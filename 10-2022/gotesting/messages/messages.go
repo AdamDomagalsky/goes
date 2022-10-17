@@ -1,11 +1,18 @@
 package messages
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func Greet(name string) string {
-	return fmt.Sprintf("Hello %v\n", name)
+	return fmt.Sprintf("Hello, %v!\n", name)
 }
 
 func depart(name string) string {
-	return fmt.Sprintf("Goodbye, %v", name)
+	return fmt.Sprintf("Goodbye, %v!\n", name)
+}
+
+func uncoveredFunc() error {
+	// go test ./... -cover
+	return nil
 }
