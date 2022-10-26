@@ -2,8 +2,11 @@ package main
 
 import (
 	"embed"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -127,6 +130,7 @@ func main() {
 		}
 	})
 
+	// curl --location --request POST 'localhost:3000/api/timeoff' \ --header 'Content-Type: application/json' \ --data-raw '{ "date": "2023-12-31T00:00:00Z", "amount":-1 } '
 	apiGroup := router.Group("/api")
 	apiGroup.POST("/timeoff", func(context *gin.Context) {
 		var timeoffRequest TimeoffRequest
@@ -135,6 +139,51 @@ func main() {
 		} else {
 			context.String(http.StatusInternalServerError, err.Error())
 		}
+	})
+
+	// download
+	// http://localhost:3000/tales
+	router.StaticFile("/tales", "./tales/index.html")
+	router.GET("/tale_of_two_cities", func(context *gin.Context) {
+		//context.File("./tales/a_tale_of_two_cities.txt")
+		f, err := os.Open("./tales/a_tale_of_two_cities.txt")
+		if err != nil {
+			context.AbortWithError(http.StatusInternalServerError, err)
+		}
+		data, err := io.ReadAll(f)
+		if err != nil {
+			context.AbortWithError(http.StatusInternalServerError, err)
+		}
+		context.Data(http.StatusOK, "text/plain", data)
+	})
+
+	router.GET("/great_expectations", func(context *gin.Context) {
+		talesDir := "tales"
+		fileName := "great_expectations.txt"
+		f, err := os.Open(filepath.Join(talesDir, fileName))
+		if err != nil {
+			context.AbortWithError(http.StatusInternalServerError, err)
+		}
+		fi, err := os.Stat(f.Name())
+		if err != nil {
+			context.AbortWithError(http.StatusInternalServerError, err)
+		}
+		buf := make([]byte, 512)
+		_, err = f.Read(buf)
+		f.Seek(0, 0)
+		if err != nil {
+			context.AbortWithError(http.StatusInternalServerError, err)
+		}
+		contentType := http.DetectContentType(buf)
+		context.DataFromReader(http.StatusOK,
+			fi.Size(),
+			contentType,
+			f,
+			map[string]string{
+				"Content-Disposition": "attachment;filename=" + fileName,
+				"Content-Type":        contentType,
+				"Content-Length":      string(fi.Size()),
+			})
 	})
 
 	// starting server & fatal if fail
