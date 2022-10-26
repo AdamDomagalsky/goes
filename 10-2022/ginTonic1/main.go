@@ -186,6 +186,30 @@ func main() {
 			})
 	})
 
+	// http://localhost:3000/great_expectations2 streams 4kb
+	router.GET("/great_expectations2", func(context *gin.Context) {
+		talesDir := "tales"
+		fileName := "great_expectations.txt"
+		f, err := os.Open(filepath.Join(talesDir, fileName))
+		if err != nil {
+			context.AbortWithError(http.StatusInternalServerError, err)
+		}
+		context.Stream(streamer(f))
+	})
 	// starting server & fatal if fail
 	log.Fatal(router.Run(":3000"))
+}
+
+func streamer(r io.Reader) func(writer io.Writer) bool {
+	return func(step io.Writer) bool {
+		for {
+			data := make([]byte, 4*2^10)
+			if _, err := r.Read(data); err == nil {
+				_, err := step.Write(data)
+				return err == nil
+			} else {
+				return false
+			}
+		}
+	}
 }
