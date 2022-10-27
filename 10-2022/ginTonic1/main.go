@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"goes/10-2022/ginTonic1/employee"
 )
 
 //go:embed public/*
@@ -39,6 +41,7 @@ var ValidatorFuture validator.Func = func(fl validator.FieldLevel) bool {
 
 func main() {
 	router := gin.Default()
+	router.LoadHTMLGlob("./templates/*")
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("future", ValidatorFuture)
 	}
@@ -46,25 +49,25 @@ func main() {
 	router.GET("/hello", func(context *gin.Context) {
 		context.String(http.StatusOK, "Hello world!")
 	})
-	//just one file http://localhost:3000/
-	router.StaticFile("/", "./public/index.html")
+	//just one file http://localhost:3000/sf
+	router.StaticFile("/sf", "./public/index.html")
 	// whole directory http://localhost:3000/public
 	router.Static("/public", "./public")
-	// embedded into binary http://localhost:3000/fs/public/app.css
-	router.StaticFS("/fs", http.FileSystem(http.FS(f)))
+	// embedded into binary http://localhost:3000/sfs/public/app.css
+	router.StaticFS("/sfs", http.FileSystem(http.FS(f)))
 
-	router.GET("/employee", func(context *gin.Context) {
+	router.GET("/employeeHtml", func(context *gin.Context) {
 		context.File("./public/employee.html")
 	})
 
-	// http://localhost:3000/employees/ajane
-	router.GET("/employees/:username", func(context *gin.Context) {
+	// http://localhost:3000/employeesOLD/ajane
+	router.GET("/employeesOLD/:username", func(context *gin.Context) {
 		username := context.Param("username")
 		context.String(http.StatusOK, username)
 	})
 
-	// http://localhost:3000/employees/ajane/roles/42
-	router.GET("/employees/:username/*rest", func(context *gin.Context) {
+	// http://localhost:3000/employeesOLD/ajane/roles/42
+	router.GET("/employeesOLD/:username/*rest", func(context *gin.Context) {
 		context.JSON(http.StatusOK, gin.H{
 			"username": context.Param("username"),
 			"rest":     context.Param("rest"),
@@ -83,8 +86,8 @@ func main() {
 		context.String(http.StatusOK, "Page to administer polices")
 	})
 
-	//http://localhost:3000/api/whatever
-	router.GET("/api/*rest", func(context *gin.Context) {
+	//http://localhost:3000/apiOLD/whatever
+	router.GET("/apiOLD/*rest", func(context *gin.Context) {
 		url := context.Request.URL.String()
 		headers := context.Request.Header
 		cookies := context.Request.Cookies()
@@ -121,7 +124,7 @@ func main() {
 	})
 
 	// http://localhost:3000/employee
-	router.POST("/employee", func(context *gin.Context) {
+	router.POST("/employeeOLD", func(context *gin.Context) {
 		var timeoffRequest TimeoffRequest
 		if err := context.ShouldBind(&timeoffRequest); err == nil {
 			context.JSON(http.StatusOK, timeoffRequest)
@@ -196,6 +199,70 @@ func main() {
 		}
 		context.Stream(streamer(f))
 	})
+
+	router.LoadHTMLGlob("./templates/*")
+	router.GET("/", func(context *gin.Context) {
+		context.Redirect(http.StatusTemporaryRedirect, "/empTmpl")
+	})
+
+	router.GET("empTmpl", func(context *gin.Context) {
+		context.HTML(http.StatusOK, "index.tmpl", employee.GetAll())
+	})
+
+	router.POST("/employee", func(context *gin.Context) {
+		context.Request.Method = http.MethodGet
+		context.Redirect(http.StatusFound, "employee")
+	})
+	router.GET("/employees/:employeeID", func(context *gin.Context) {
+		employeeIDRaw := context.Param("employeeID")
+		if emp, ok := tryToGetEmployee(context, employeeIDRaw); ok {
+			context.HTML(http.StatusOK, "employee.tmpl", emp)
+		}
+	})
+	router.POST("/employees/:employeeID", func(context *gin.Context) {
+		var timeoff employee.TimeOff
+		err := context.ShouldBind(&timeoff)
+		if err != nil {
+			context.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		timeoff.Type = employee.TimeoffTypePTO
+		timeoff.Status = employee.TimeoffStatusRequested
+		employeeIDRaw := context.Param("employeeID")
+		if employee, ok := tryToGetEmployee(context, employeeIDRaw); ok {
+			employee.TimeOff = append(employee.TimeOff, timeoff)
+			context.Redirect(http.StatusFound, "/employees/"+employeeIDRaw)
+		}
+	})
+
+	empApiG := apiGroup.Group("employees")
+	empApiG.GET("/", func(context *gin.Context) {
+		context.JSON(http.StatusOK, employee.GetAll())
+	})
+	empApiG.GET("/:employeeID", func(context *gin.Context) {
+		employeeIDRaw := context.Param("employeeID")
+		if emp, ok := tryToGetEmployee(context, employeeIDRaw); ok {
+			context.JSON(http.StatusOK, *emp)
+		}
+	})
+	empApiG.POST("/:employeeID", func(context *gin.Context) {
+		var timeoff employee.TimeOff
+		err := context.ShouldBind(&timeoff)
+		if err != nil {
+			context.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		timeoff.Type = employee.TimeoffTypePTO
+		timeoff.Status = employee.TimeoffStatusRequested
+		employeeIDRaw := context.Param("employeeID")
+		if emp, ok := tryToGetEmployee(context, employeeIDRaw); ok {
+			emp.TimeOff = append(emp.TimeOff, timeoff)
+			context.JSON(http.StatusOK, *emp)
+		}
+	})
+	// to generate JSON msg on the fly use gin.H
+	h := gin.H{"field1": "value2", "field2": 123} // type of a map of string to the empty interface
+	println(h)
 	// starting server & fatal if fail
 	log.Fatal(router.Run(":3000"))
 }
@@ -212,4 +279,17 @@ func streamer(r io.Reader) func(writer io.Writer) bool {
 			}
 		}
 	}
+}
+func tryToGetEmployee(ctx *gin.Context, employeeIDRaw string) (*employee.Employee, bool) {
+	id, err := strconv.Atoi(employeeIDRaw)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, errors.New("lol"))
+		return nil, false
+	}
+	emp, err := employee.Get(id)
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return nil, false
+	}
+	return emp, true
 }
