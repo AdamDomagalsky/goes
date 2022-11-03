@@ -41,6 +41,8 @@ var ValidatorFuture validator.Func = func(fl validator.FieldLevel) bool {
 
 func main() {
 	router := gin.Default()
+	//router.Use(gin.BasicAuth(gin.Accounts{"admin": "password"}))
+	//router.Use(gzip.Gzip(gzip.BestCompression))
 	router.LoadHTMLGlob("./templates/*")
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("future", ValidatorFuture)
@@ -235,7 +237,7 @@ func main() {
 		}
 	})
 
-	empApiG := apiGroup.Group("employees")
+	empApiG := apiGroup.Group("employees", Benchmark)
 	empApiG.GET("/", func(context *gin.Context) {
 		context.JSON(http.StatusOK, employee.GetAll())
 	})
@@ -293,3 +295,16 @@ func tryToGetEmployee(ctx *gin.Context, employeeIDRaw string) (*employee.Employe
 	}
 	return emp, true
 }
+
+var Benchmark gin.HandlerFunc = func(c *gin.Context) {
+	// do things before middleware or handler
+	now := time.Now()
+	c.Next()
+	elapsed := time.Since(now)
+	log.Println("Time to process: ", elapsed)
+	// do things after middleware or handler
+}
+
+// router.Use(myGlobalMiddleware)
+// router.GET("/route/path", routeSpecificMiddleware, func....
+// routeGroup.Get(...) same as above
