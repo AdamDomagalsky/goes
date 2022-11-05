@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -40,7 +41,16 @@ var ValidatorFuture validator.Func = func(fl validator.FieldLevel) bool {
 }
 
 func main() {
-	router := gin.Default()
+	r := gin.Default()
+	r.LoadHTMLGlob("./templates/*")
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	registerRoutes(r)
+
+	// starting server & fatal if fail
+	log.Fatal(r.Run())
+}
+
+func registerRoutes(router *gin.Engine) {
 	//router.Use(gin.BasicAuth(gin.Accounts{"admin": "password"}))
 	//router.Use(gzip.Gzip(gzip.BestCompression))
 	router.LoadHTMLGlob("./templates/*")
@@ -187,7 +197,7 @@ func main() {
 			map[string]string{
 				"Content-Disposition": "attachment;filename=" + fileName,
 				"Content-Type":        contentType,
-				"Content-Length":      string(fi.Size()),
+				"Content-Length":      strconv.FormatInt(fi.Size(), 10),
 			})
 	})
 
@@ -265,8 +275,7 @@ func main() {
 	// to generate JSON msg on the fly use gin.H
 	h := gin.H{"field1": "value2", "field2": 123} // type of a map of string to the empty interface
 	println(h)
-	// starting server & fatal if fail
-	log.Fatal(router.Run(":3000"))
+
 }
 
 func streamer(r io.Reader) func(writer io.Writer) bool {
