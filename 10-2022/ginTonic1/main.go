@@ -41,6 +41,9 @@ var ValidatorFuture validator.Func = func(fl validator.FieldLevel) bool {
 }
 
 func main() {
+	if os.Getenv("PORT") == "" {
+		os.Setenv("PORT", "3000")
+	}
 	r := gin.Default()
 	r.LoadHTMLGlob("./templates/*")
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -276,6 +279,13 @@ func registerRoutes(router *gin.Engine) {
 	h := gin.H{"field1": "value2", "field2": 123} // type of a map of string to the empty interface
 	println(h)
 
+	router.Use(myErrorLogger) // to see below in action
+	router.GET("/errors", func(context *gin.Context) {
+		err := &gin.Error{Err: errors.New("something went horribly wrong"),
+			Type: gin.ErrorTypeRender | gin.ErrorTypePublic,
+			Meta: "this error was intentional"}
+		context.Error(err)
+	})
 }
 
 func streamer(r io.Reader) func(writer io.Writer) bool {
@@ -312,6 +322,17 @@ var Benchmark gin.HandlerFunc = func(c *gin.Context) {
 	elapsed := time.Since(now)
 	log.Println("Time to process: ", elapsed)
 	// do things after middleware or handler
+}
+
+var myErrorLogger gin.HandlerFunc = func(context *gin.Context) {
+	context.Next()
+	for _, err := range context.Errors {
+		log.Print(map[string]any{
+			"Err":  err.Error(),
+			"Type": err.Type,
+			"Meta": err.Meta,
+		})
+	}
 }
 
 // router.Use(myGlobalMiddleware)
