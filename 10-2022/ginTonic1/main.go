@@ -286,6 +286,10 @@ func registerRoutes(router *gin.Engine) {
 			Meta: "this error was intentional"}
 		context.Error(err)
 	})
+	router.Use(gin.CustomRecovery(myRecoveryFunc))
+	router.GET("/panic", func(context *gin.Context) {
+		panic("a Go program should almost never call panic")
+	})
 }
 
 func streamer(r io.Reader) func(writer io.Writer) bool {
@@ -333,6 +337,10 @@ var myErrorLogger gin.HandlerFunc = func(context *gin.Context) {
 			"Meta": err.Meta,
 		})
 	}
+}
+
+var myRecoveryFunc gin.RecoveryFunc = func(c *gin.Context, err any) {
+	log.Print("Custom recovery function can be used add fine-grained control recovery strategies.", err)
 }
 
 // router.Use(myGlobalMiddleware)
