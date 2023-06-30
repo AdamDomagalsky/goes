@@ -1,0 +1,76 @@
+plugins {
+    id "java"
+    id "idea"
+    id "com.google.protobuf" version "0.9.0"
+}
+
+group 'com.clementjean.proto'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    protoVersion = "3.21.9"
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$protoVersion"
+    }
+}
+
+dependencies {
+    implementation "com.google.protobuf:protobuf-java:$protoVersion"
+    implementation "com.google.protobuf:protobuf-java-util:$protoVersion"
+}
+
+task simple(type: JavaExec) {
+    group = "Execution"
+    description = "Run the simple example"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'simple.SimpleMain'
+}
+
+task complex(type: JavaExec) {
+    group = "Execution"
+    description = "Run the complex example"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'complex.ComplexMain'
+}
+
+task enums(type: JavaExec) {
+    group = "Execution"
+    description = "Run the enumerations example"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'enumerations.EnumerationsMain'
+}
+
+task maps(type: JavaExec) {
+    group = "Execution"
+    description = "Run the maps example"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'maps.MapsMain'
+}
+
+task oneofs(type: JavaExec) {
+    group = "Execution"
+    description = "Run the oneofs example"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'oneofs.OneOfMain'
+}
+
+task io(type: JavaExec) {
+    group = "Execution"
+    description = "Run the enumerations example"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'io.IoMain'
+}
+
+task json(type: JavaExec) {
+    group = "Execution"
+    description = "Run the json example"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'json.JsonMain'
+}
