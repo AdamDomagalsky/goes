@@ -1,0 +1,1 @@
+protoc -Igreet/proto --go_out=greet/proto --go_opt=module=github.com/AdamDomagalsky/goes/2023/gRPC/greet/proto --go-grpc_out=greet/proto --go-grpc_opt=module=github.com/AdamDomagalsky/goes/2023/gRPC/greet/proto greet/proto/dummy.proto
