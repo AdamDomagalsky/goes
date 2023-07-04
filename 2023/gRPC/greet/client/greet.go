@@ -13,7 +13,7 @@ func doGreet(c pb.GreetServiceClient) {
 		FirstName: "Adam",
 	})
 	if err != nil {
-		log.Fatalf("Could not gree: %v\n", err)
+		log.Fatalf("Could not greet: %v\n", err)
 	}
 
 	log.Printf("Greeting: %s\n", res.Result)
