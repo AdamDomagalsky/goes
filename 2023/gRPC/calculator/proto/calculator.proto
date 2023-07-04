@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "github.com/AdamDomagalsky/goes/2023/gRPC/calculator/proto";
+
+message CalculatorRequest {
+    int32 a = 1;
+    int32 b = 2;    
+}
+
+message CalculatorResponse {
+    int64 sum = 1;
+}
+
+service CalculatorService {
+    rpc Sum (CalculatorRequest) returns (CalculatorResponse);
+}
