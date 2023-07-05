@@ -9,7 +9,7 @@ import (
 
 func doSum(c pb.CalculatorServiceClient) {
 	log.Printf("doSum was invoked")
-	res, err := c.Sum(context.Background(), &pb.CalculatorRequest{
+	res, err := c.Sum(context.Background(), &pb.SumRequest{
 		A: 3,
 		B: 10,
 	})
@@ -18,5 +18,5 @@ func doSum(c pb.CalculatorServiceClient) {
 		log.Fatalf("Could not sum: %v\n", err)
 	}
 
-	log.Printf("Sum(a,b): %v\n", res.Sum)
+	log.Printf("Sum(a,b): %v\n", res.Result)
 }
