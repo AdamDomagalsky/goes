@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -22,7 +21,7 @@ func doLongGreet(c pb.GreetServiceClient) {
 		log.Fatalf("Error while calling LongGreet: %v\n", err)
 	}
 	for _, req := range reqs {
-		fmt.Printf("Sending req: %v\n", req)
+		log.Printf("Sending req: %v\n", req)
 		stream.Send(req)
 		time.Sleep(1 * time.Second)
 	}
