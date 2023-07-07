@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	pb "github.com/AdamDomagalsky/goes/2023/gRPC/greet/proto"
 	"google.golang.org/grpc"
@@ -21,5 +22,8 @@ func main() {
 	// doGreet(c)
 	// doGreetManyTimes(c)
 	// doLongGreet(c)
-	doGreetEveryone(c)
+	// doGreetEveryone(c)
+	doGreetWithDeadline(c, 5*time.Second)
+	doGreetWithDeadline(c, 3*time.Second)
+	doGreetWithDeadline(c, 2*time.Second)
 }
