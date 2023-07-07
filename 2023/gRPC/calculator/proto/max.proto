@@ -1,0 +1,11 @@
+syntax = "proto3";
+package calculator;
+option go_package = "github.com/AdamDomagalsky/goes/2023/gRPC/calculator/proto";
+
+message MaxRequest {
+    int64 number = 1;
+}
+
+message MaxResponse {
+    int64 result = 1;
+}

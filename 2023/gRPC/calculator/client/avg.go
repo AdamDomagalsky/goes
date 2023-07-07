@@ -16,16 +16,10 @@ func doAvg(c pb.CalculatorServiceClient) {
 		log.Fatalf("Error while calling doAvg: %v\n", err)
 	}
 
-	reqs := []*pb.AvgRequest{
-		{Number: 10},
-		{Number: 10},
-		{Number: 10},
-		{Number: 10},
-	}
-
-	for _, req := range reqs {
-		log.Printf("Sending req: %v\n", req)
-		stream.Send(req)
+	numbers := []int32{1, 2, 3, 4, 5, 6, 7, 8}
+	for _, number := range numbers {
+		log.Printf("Sending req: %v\n", number)
+		stream.Send(&pb.AvgRequest{Number: uint64(number)})
 		time.Sleep(1 * time.Second)
 	}
 
