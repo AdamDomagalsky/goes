@@ -6,6 +6,7 @@ import (
 
 	pb "github.com/AdamDomagalsky/goes/2023/gRPC/calculator/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 var addr string = "0.0.0.0:50051"
@@ -23,6 +24,7 @@ func main() {
 
 	s := grpc.NewServer()
 	pb.RegisterCalculatorServiceServer(s, &Server{})
+	reflection.Register(s) // required to make evans work
 	if err != s.Serve(lis) {
 		log.Fatalf("Failed to serve %v\n", err)
 	}
