@@ -20,7 +20,14 @@ migratedown:
 sqlc:
 	sqlc generate
 
+# Test and coverage
+test:
+	go test --cover ./...
 
-.PHONY: postgres createdb
+cover: test
+	go tool cover -html cover.out -o cover.html
+	open cover.html
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test
 killall:
 	docker kill $(docker ps -aq)

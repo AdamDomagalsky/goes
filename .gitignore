@@ -9,3 +9,6 @@
 .DS_Store
 .idea
 creating-web-services-go
+# Cover test results
+cover.html
+cover.out
