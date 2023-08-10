@@ -11,11 +11,14 @@ dropdb:
 	docker-compose exec $(DATABASE_NAME) dropdb --username=$(DATABASE_USERNAME) $(DATABASE_NAME) 
 
 # Migrate database up & down lvl
-MIGRATE_COMMAND:=migrate -path ./db/migration --database "postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@localhost:5432/pg-bank?sslmode=disable" --verbose
+MIGRATE_COMMAND:=migrate -path ./db/migrations --database "postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@localhost:5432/pg-bank?sslmode=disable" --verbose
 migrateup:
 	$(MIGRATE_COMMAND) up
 migratedown:
 	$(MIGRATE_COMMAND) down
+
+sqlc:
+	sqlc generate
 
 
 .PHONY: postgres createdb
