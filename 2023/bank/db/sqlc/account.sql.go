@@ -32,12 +32,12 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 	return i, err
 }
 
-const deleteaccount = `-- name: Deleteaccount :exec
+const deleteAccount = `-- name: DeleteAccount :exec
 DELETE FROM accounts WHERE id = $1
 `
 
-func (q *Queries) Deleteaccount(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteaccount, id)
+func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteAccount, id)
 	return err
 }
 
