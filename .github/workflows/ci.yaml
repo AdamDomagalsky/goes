@@ -1,0 +1,46 @@
+name: ci-test
+
+on:
+  push:
+    branches: [ master, bank ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./2023/bank
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: pg-bank
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+    - name: Set up go
+      uses: actions/setup-go@v4.1.0
+      with:
+        go-version: 1.21
+      id: go
+    - name : Checkout
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        echo "Installing golang-migrate"
+        go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+    - name: Run migration
+      run: make migrateup
+
+    - name: Test
+      run: make test
