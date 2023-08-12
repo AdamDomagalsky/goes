@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/AdamDomagalsky/goes/2023/bank/util"
 	_ "github.com/lib/pq" // blank import: side-effect init pg driver
 )
 
@@ -19,8 +20,11 @@ const (
 
 // go test main_test.go db.go
 func TestMain(m *testing.M) {
-	var err error
-	testDB, err = sql.Open(dbDriver, dbSource)
+	config, err := util.LoadConfig("../..")
+	if err != nil {
+		log.Fatal("Cannot load env config:", err)
+	}
+	testDB, err = sql.Open(config.DBDriver, config.DATABASE_URL)
 	if err != nil {
 		log.Fatal("Cannot connect to db:", err)
 	}
