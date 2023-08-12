@@ -28,6 +28,7 @@ cover: test
 	go tool cover -html cover.out -o cover.html
 	open cover.html
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test
-killall:
-	docker kill $(docker ps -aq)
+server:
+	go run main.go
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server
