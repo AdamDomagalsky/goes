@@ -9,6 +9,7 @@ import (
 
 	db "github.com/AdamDomagalsky/goes/2023/bank/db/sqlc"
 	"github.com/AdamDomagalsky/goes/2023/bank/util"
+	"github.com/gin-gonic/gin"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -19,18 +20,18 @@ import (
 	"github.com/ory/dockertest/v3"
 )
 
-var config util.Config
+var (
+	config  util.Config
+	testEnv *TestEnv
+)
 
 func TestMain(m *testing.M) {
-	var err error
-	config, err = util.LoadConfig("..")
-	if err != nil {
-		log.Fatal("Cannot load env config:", err)
-	}
+	gin.SetMode(gin.TestMode)
 
-	testEnv := NewTestEnv(config)
-	testEnv.purge()
-	os.Exit(m.Run())
+	testEnv = setup()
+	exitCode := m.Run()
+	testEnv.teardown()
+	os.Exit(exitCode)
 }
 
 type TestEnv struct {
@@ -41,16 +42,25 @@ type TestEnv struct {
 	resource *dockertest.Resource
 }
 
-func (enviroment *TestEnv) purge() {
+func (enviroment *TestEnv) teardown() {
 	// You can't defer this because os.Exit doesn't care for defer
 	if err := enviroment.pool.Purge(enviroment.resource); err != nil {
 		log.Fatalf("Could not purge resource: %s", err)
 	}
 }
 
-func NewTestEnv(config util.Config) *TestEnv {
+func setup() *TestEnv {
+	if testEnv != nil {
+		testEnv.teardown()
+	}
+	var err error
+	config, err = util.LoadConfig("..")
+	if err != nil {
+		log.Fatal("Cannot load env config:", err)
+	}
+
 	pool, conn, resource := setupTestDB(config)
-	err := migrateUp(conn, config.DATABASE_NAME)
+	err = migrateUp(conn, config.DATABASE_NAME)
 	if err != nil {
 		fmt.Printf("failed migrateUp: %+v\n", err)
 		err = pool.Purge(resource)
