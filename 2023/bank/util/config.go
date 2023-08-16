@@ -1,12 +1,19 @@
 package util
 
 import (
+	"fmt"
+
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	DBDriver       string `mapstructure:"DATABASE_DRVIER"`
-	DATABASE_URL   string `mapstructure:"DATABASE_URL"`
+	DATABASE_DRVIER   string `mapstructure:"DATABASE_DRVIER"`
+	DATABASE_HOST     string `mapstructure:"DATABASE_HOST"`
+	DATABASE_NAME     string `mapstructure:"DATABASE_NAME"`
+	DATABASE_PASSWORD string `mapstructure:"DATABASE_PASSWORD"`
+	DATABASE_PORT     string `mapstructure:"DATABASE_PORT"`
+	DATABASE_USERNAME string `mapstructure:"DATABASE_USERNAME"`
+
 	SERVER_API_URL string `mapstructure:"SERVER_API_URL"`
 }
 
@@ -23,4 +30,14 @@ func LoadConfig(path string) (config Config, err error) {
 
 	err = viper.Unmarshal(&config)
 	return
+}
+
+func DbURL(config Config) string {
+	return fmt.Sprintf("%s://%s:%s@%s:%s/%s?sslmode=disable",
+		config.DATABASE_DRVIER,
+		config.DATABASE_USERNAME,
+		config.DATABASE_PASSWORD,
+		config.DATABASE_HOST,
+		config.DATABASE_PORT,
+		config.DATABASE_NAME)
 }

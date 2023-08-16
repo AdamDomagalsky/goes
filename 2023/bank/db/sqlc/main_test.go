@@ -10,13 +10,8 @@ import (
 	_ "github.com/lib/pq" // blank import: side-effect init pg driver
 )
 
-var testQueries *Queries
 var testDB *sql.DB
-
-const (
-	dbDriver = "postgres"
-	dbSource = "postgresql://admin:secret@localhost:5432/pg-bank?sslmode=disable"
-)
+var testQueries *Queries
 
 // go test main_test.go db.go
 func TestMain(m *testing.M) {
@@ -24,7 +19,8 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal("Cannot load env config:", err)
 	}
-	testDB, err = sql.Open(config.DBDriver, config.DATABASE_URL)
+
+	testDB, err = sql.Open(config.DATABASE_DRVIER, util.DbURL(config))
 	if err != nil {
 		log.Fatal("Cannot connect to db:", err)
 	}
