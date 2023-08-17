@@ -1,13 +1,23 @@
--- https://dbdiagram.io/d/64d4a17e02bd1c4a5e8d7a30
+Table users as U {
+  username varchar [pk]
+  password varchar [not null]
+  full_name varchar [not null]
+  email varchar [unique, not null]
+  password_changes timestamptz [not null, default: '0001-01-01 00:00:00Z']
+  created_at timestamptz [not null, default: `now()`]
+
+}
+
 Table accounts as A {
   id bigserial [pk]
-  owner varchar [not null]
+  owner varchar [ref: > U.username, not null]
   balance bigint [not null]
   currency varchar [not null]
   created_at timestamptz [not null, default: `now()`]
 
   Indexes {
     owner
+    (owner, currency) [unique] // so the user can have 1 account per currency
   }
 }
 
@@ -34,4 +44,3 @@ Table transfers {
     (from_account_id, to_account_id)
   }
 }
-

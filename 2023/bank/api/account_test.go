@@ -62,11 +62,15 @@ func TestGetAccountAPI(t *testing.T) {
 }
 
 func randomAccount(store db.Store) (db.Account, error) {
-	return store.CreateAccount(context.Background(), db.CreateAccountParams{
+	return createAccount(store, db.CreateAccountParams{
 		Owner:    util.RandomOwner(),
 		Balance:  util.RandomMoney(),
 		Currency: util.RandomCurrency(),
 	})
+}
+
+func createAccount(store db.Store, params db.CreateAccountParams) (db.Account, error) {
+	return store.CreateAccount(context.Background(), params)
 }
 
 func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, account db.Account) {

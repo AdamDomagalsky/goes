@@ -16,6 +16,11 @@ migrateup:
 	$(MIGRATE_COMMAND) up
 migratedown:
 	$(MIGRATE_COMMAND) down
+migrateup1:
+	$(MIGRATE_COMMAND) up 1
+migratedown1:
+	$(MIGRATE_COMMAND) down 1
+
 
 sqlc:
 	sqlc generate
@@ -31,4 +36,4 @@ cover: test
 server:
 	go run main.go
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server
+.PHONY: postgres createdb dropdb migrateup migratedown migratedown1 migrateup1 sqlc test server
