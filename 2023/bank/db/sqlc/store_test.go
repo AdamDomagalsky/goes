@@ -10,9 +10,8 @@ import (
 
 func TestTransferTx(t *testing.T) {
 
-	store := NewStore(testDB)
-	account1 := createRandomAccount(t)
-	account2 := createRandomAccount(t)
+	account1 := CreateRandomAccount(t, testEnv.Store)
+	account2 := CreateRandomAccount(t, testEnv.Store)
 	fmt.Println(">> before: ", account1.Balance, account2.Balance)
 	// run n concurrent transfer transactions
 	n := 5
@@ -23,7 +22,7 @@ func TestTransferTx(t *testing.T) {
 		txName := fmt.Sprintf("tx %d", i+1)
 		go func() {
 			ctx := context.WithValue(context.Background(), txKey, txName)
-			result, err := store.TransferTX(ctx, TransferTxParams{
+			result, err := testEnv.Store.TransferTX(ctx, TransferTxParams{
 				FromAccountID: account1.ID,
 				ToAccountID:   account2.ID,
 				Amount:        amount,
@@ -51,7 +50,7 @@ func TestTransferTx(t *testing.T) {
 		require.NotZero(t, transfer.ID)
 		require.NotZero(t, transfer.CreatedAt)
 
-		_, err = store.GetTransfer(context.Background(), transfer.ID)
+		_, err = testEnv.Store.GetTransfer(context.Background(), transfer.ID)
 		require.NoError(t, err)
 
 		// check entries
@@ -62,7 +61,7 @@ func TestTransferTx(t *testing.T) {
 		require.NotZero(t, fromEntry.ID)
 		require.NotZero(t, fromEntry.CreatedAt)
 
-		_, err = store.GetEntry(context.Background(), fromEntry.ID)
+		_, err = testEnv.Store.GetEntry(context.Background(), fromEntry.ID)
 		require.NoError(t, err)
 
 		toEntry := result.ToEntry
@@ -72,7 +71,7 @@ func TestTransferTx(t *testing.T) {
 		require.NotZero(t, toEntry.ID)
 		require.NotZero(t, toEntry.CreatedAt)
 
-		_, err = store.GetEntry(context.Background(), toEntry.ID)
+		_, err = testEnv.Store.GetEntry(context.Background(), toEntry.ID)
 		require.NoError(t, err)
 
 		// check account's balance
@@ -98,9 +97,9 @@ func TestTransferTx(t *testing.T) {
 		existed[k] = true
 	}
 
-	updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.ID)
+	updatedAccount1, err := testEnv.Store.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
-	updatedAccount2, err := testQueries.GetAccount(context.Background(), account2.ID)
+	updatedAccount2, err := testEnv.Store.GetAccount(context.Background(), account2.ID)
 	require.NoError(t, err)
 	fmt.Println(">> after: ", updatedAccount1.Balance, updatedAccount2.Balance)
 
@@ -110,9 +109,8 @@ func TestTransferTx(t *testing.T) {
 
 func TestTransferTxDeadlock(t *testing.T) {
 
-	store := NewStore(testDB)
-	account1 := createRandomAccount(t)
-	account2 := createRandomAccount(t)
+	account1 := CreateRandomAccount(t, testEnv.Store)
+	account2 := CreateRandomAccount(t, testEnv.Store)
 	fmt.Println(">> before: ", account1.Balance, account2.Balance)
 	// run n concurrent transfer transactions
 	n := 10
@@ -130,7 +128,7 @@ func TestTransferTxDeadlock(t *testing.T) {
 		txName := fmt.Sprintf("tx %d", i+1)
 		go func() {
 			ctx := context.WithValue(context.Background(), txKey, txName)
-			_, err := store.TransferTX(ctx, TransferTxParams{
+			_, err := testEnv.Store.TransferTX(ctx, TransferTxParams{
 				FromAccountID: fromAccountID,
 				ToAccountID:   toAccountID,
 				Amount:        amount,
@@ -145,9 +143,9 @@ func TestTransferTxDeadlock(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.ID)
+	updatedAccount1, err := testEnv.Store.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
-	updatedAccount2, err := testQueries.GetAccount(context.Background(), account2.ID)
+	updatedAccount2, err := testEnv.Store.GetAccount(context.Background(), account2.ID)
 	require.NoError(t, err)
 	fmt.Println(">> after: ", updatedAccount1.Balance, updatedAccount2.Balance)
 

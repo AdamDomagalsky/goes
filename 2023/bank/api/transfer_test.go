@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,27 +17,26 @@ import (
 
 func TestCreateTransferAPI(t *testing.T) {
 	amount := int64(10)
-	server := testEnv.server
+	server := testServer
 	store := server.store
-	user1, _ := randomUser(t, store)
-	user2, _ := randomUser(t, store)
-	user3, _ := randomUser(t, store)
-
-	account1, err := createAccount(store, db.CreateAccountParams{
+	user1, _ := db.CreateRandomUser(t, store)
+	user2, _ := db.CreateRandomUser(t, store)
+	user3, _ := db.CreateRandomUser(t, store)
+	account1, err := store.CreateAccount(context.Background(), db.CreateAccountParams{
 		Owner:    user1.Username,
 		Currency: util.USD,
 		Balance:  1000,
 	})
 	require.NoError(t, err)
 
-	account2, _ := createAccount(store, db.CreateAccountParams{
+	account2, _ := store.CreateAccount(context.Background(), db.CreateAccountParams{
 		Owner:    user2.Username,
 		Currency: util.USD,
 		Balance:  0,
 	})
 	require.NoError(t, err)
 
-	account3, _ := createAccount(store, db.CreateAccountParams{
+	account3, _ := store.CreateAccount(context.Background(), db.CreateAccountParams{
 		Owner:    user3.Username,
 		Currency: util.EUR,
 		Balance:  1000,

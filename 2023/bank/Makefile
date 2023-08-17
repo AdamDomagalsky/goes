@@ -1,6 +1,9 @@
 include .env
 export
 
+COVERAGE_DIR ?= .coverage
+
+
 postgres:
 	docker-compose up $(DATABASE_NAME) -d
 
@@ -27,11 +30,13 @@ sqlc:
 
 # Test and coverage
 test:
-	go test --cover ./...
+	go test -coverprofile $(COVERAGE_DIR)/combined.txt --cover ./...
 
-cover: test
-	go tool cover -html cover.out -o cover.html
-	open cover.html
+cover:
+	@-rm -r $(COVERAGE_DIR)
+	@mkdir $(COVERAGE_DIR)
+	make test
+	go tool cover -html=$(COVERAGE_DIR)/combined.txt -o cover.html
 
 server:
 	go run main.go
