@@ -6,6 +6,7 @@ import (
 
 	db "github.com/AdamDomagalsky/goes/2023/bank/db/sqlc"
 	"github.com/gin-gonic/gin"
+	pg "github.com/lib/pq" // blank import: side-effect init pg driver
 )
 
 type createAccountParams struct {
@@ -26,6 +27,13 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		Currency: req.Currency,
 	})
 	if err != nil {
+		if pgErr, ok := err.(*pg.Error); ok {
+			switch pgErr.Code.Name() {
+			case "unique_violation", "foreign_key_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+			}
+		}
+
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}

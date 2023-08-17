@@ -2,7 +2,6 @@ package api
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,14 +9,11 @@ import (
 	"testing"
 
 	db "github.com/AdamDomagalsky/goes/2023/bank/db/sqlc"
-	"github.com/AdamDomagalsky/goes/2023/bank/util"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGetAccountAPI(t *testing.T) {
-	server := testEnv.server
-	account, err := randomAccount(server.store)
-	require.NoError(t, err)
+	account := db.CreateRandomAccount(t, testServer.store)
 
 	testCases := []struct {
 		name      string
@@ -54,23 +50,11 @@ func TestGetAccountAPI(t *testing.T) {
 			url := fmt.Sprintf("/accounts/%d", tc.accountID)
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
-			server.router.ServeHTTP(recorder, req)
+			testServer.router.ServeHTTP(recorder, req)
 
 			tc.checks(t, recorder)
 		})
 	}
-}
-
-func randomAccount(store db.Store) (db.Account, error) {
-	return createAccount(store, db.CreateAccountParams{
-		Owner:    util.RandomOwner(),
-		Balance:  util.RandomMoney(),
-		Currency: util.RandomCurrency(),
-	})
-}
-
-func createAccount(store db.Store, params db.CreateAccountParams) (db.Account, error) {
-	return store.CreateAccount(context.Background(), params)
 }
 
 func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, account db.Account) {
