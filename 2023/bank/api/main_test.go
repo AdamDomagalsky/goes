@@ -18,10 +18,13 @@ var (
 
 func TestMain(m *testing.M) {
 	gin.SetMode(gin.TestMode)
-
+	var err error
 	testStore = db.NewStoreTestStore("..", testStore)
-	testServer = NewServer(testStore.Store)
-	exitCode := m.Run()
+	testServer, err = NewServer(testStore.Config, testStore.Store)
+	exitCode := 1
+	if err == nil {
+		exitCode = m.Run()
+	}
 	testStore.Teardown()
 	os.Exit(exitCode)
 }

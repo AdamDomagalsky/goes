@@ -3,6 +3,8 @@ package util
 import (
 	"fmt"
 
+	"time"
+
 	"github.com/spf13/viper"
 )
 
@@ -14,7 +16,9 @@ type Config struct {
 	DATABASE_PORT     string `mapstructure:"DATABASE_PORT"`
 	DATABASE_USERNAME string `mapstructure:"DATABASE_USERNAME"`
 
-	SERVER_API_URL string `mapstructure:"SERVER_API_URL"`
+	SERVER_API_URL        string        `mapstructure:"SERVER_API_URL"`
+	SYMMETRIC_KEY         string        `mapstructure:"SYMMETRIC_KEY"`
+	ACCESS_TOKEN_DURATION time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

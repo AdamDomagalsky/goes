@@ -20,7 +20,7 @@ import (
 )
 
 type TestStore struct {
-	config   util.Config
+	Config   util.Config
 	db       *sql.DB
 	Store    Store
 	pool     *dockertest.Pool
@@ -44,7 +44,7 @@ func NewStoreTestStore(path string, testStore *TestStore) *TestStore {
 
 	if testStore != nil {
 		testStore.Teardown()
-		config = testStore.config
+		config = testStore.Config
 	} else {
 		config, err = util.LoadConfig(path)
 		if err != nil {
@@ -66,7 +66,7 @@ func NewStoreTestStore(path string, testStore *TestStore) *TestStore {
 	store := NewStore(conn)
 
 	return &TestStore{
-		config:   config,
+		Config:   config,
 		db:       conn,
 		Store:    store,
 		pool:     pool,
