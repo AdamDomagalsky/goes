@@ -11,10 +11,12 @@ import (
 )
 
 func TestCreateAccount(t *testing.T) {
-	CreateRandomAccount(t, testEnv.Store)
+	user, _ := CreateRandomUser(t, testEnv.Store)
+	CreateRandomAccount(t, testEnv.Store, user)
 }
 func TestGetAccount(t *testing.T) {
-	account1 := CreateRandomAccount(t, testEnv.Store)
+	user, _ := CreateRandomUser(t, testEnv.Store)
+	account1 := CreateRandomAccount(t, testEnv.Store, user)
 	account2, err := testEnv.Store.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, account2)
@@ -25,7 +27,8 @@ func TestGetAccount(t *testing.T) {
 	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
 }
 func TestUpdateAccount(t *testing.T) {
-	account1 := CreateRandomAccount(t, testEnv.Store)
+	user, _ := CreateRandomUser(t, testEnv.Store)
+	account1 := CreateRandomAccount(t, testEnv.Store, user)
 	newBalance := util.RandomMoney()
 	arg := UpdateAccountParams{
 		ID:      account1.ID,
@@ -41,7 +44,8 @@ func TestUpdateAccount(t *testing.T) {
 	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
 }
 func TestDeleteAccount(t *testing.T) {
-	account1 := CreateRandomAccount(t, testEnv.Store)
+	user, _ := CreateRandomUser(t, testEnv.Store)
+	account1 := CreateRandomAccount(t, testEnv.Store, user)
 	err := testEnv.Store.DeleteAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
 	account2, err := testEnv.Store.GetAccount(context.Background(), account1.ID)
@@ -51,18 +55,23 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func TestListAccounts(t *testing.T) {
+	var lastAccount Account
 	for i := 0; i < 10; i++ {
-		CreateRandomAccount(t, testEnv.Store)
+		user, _ := CreateRandomUser(t, testEnv.Store)
+		lastAccount = CreateRandomAccount(t, testEnv.Store, user)
 	}
 	arg := ListAccountsParams{
+		Owner:  lastAccount.Owner,
 		Limit:  5,
-		Offset: 5,
+		Offset: 0,
 	}
 	accounts, err := testEnv.Store.ListAccounts(context.Background(), arg)
 	require.NoError(t, err)
-	require.Len(t, accounts, 5)
+	require.NotEmpty(t, accounts)
+	require.Len(t, accounts, 1)
 	for _, account := range accounts {
 		require.NotEmpty(t, account)
+		require.Equal(t, lastAccount.Owner, account.Owner)
 	}
 }
 

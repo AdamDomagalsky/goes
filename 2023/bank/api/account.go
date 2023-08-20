@@ -2,9 +2,11 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 
 	db "github.com/AdamDomagalsky/goes/2023/bank/db/sqlc"
+	"github.com/AdamDomagalsky/goes/2023/bank/token"
 	"github.com/gin-gonic/gin"
 	pg "github.com/lib/pq" // blank import: side-effect init pg driver
 )
@@ -21,9 +23,10 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	account, err := server.store.CreateAccount(ctx, db.CreateAccountParams{
 		Balance:  0,
-		Owner:    req.Owner,
+		Owner:    authPayload.Username,
 		Currency: req.Currency,
 	})
 	if err != nil {
@@ -51,6 +54,14 @@ func (server *Server) getAccount(ctx *gin.Context) {
 		return
 	}
 	account, err := server.store.GetAccount(ctx, req.ID)
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.Username != account.Owner {
+		err := errors.New("account does not belong to authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
@@ -75,8 +86,9 @@ func (server *Server) listAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	account, err := server.store.ListAccounts(ctx, db.ListAccountsParams{
+		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	})

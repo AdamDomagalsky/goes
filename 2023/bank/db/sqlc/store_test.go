@@ -9,9 +9,10 @@ import (
 )
 
 func TestTransferTx(t *testing.T) {
-
-	account1 := CreateRandomAccount(t, testEnv.Store)
-	account2 := CreateRandomAccount(t, testEnv.Store)
+	user1, _ := CreateRandomUser(t, testEnv.Store)
+	user2, _ := CreateRandomUser(t, testEnv.Store)
+	account1 := CreateRandomAccount(t, testEnv.Store, user1)
+	account2 := CreateRandomAccount(t, testEnv.Store, user2)
 	fmt.Println(">> before: ", account1.Balance, account2.Balance)
 	// run n concurrent transfer transactions
 	n := 5
@@ -108,9 +109,11 @@ func TestTransferTx(t *testing.T) {
 }
 
 func TestTransferTxDeadlock(t *testing.T) {
+	user1, _ := CreateRandomUser(t, testEnv.Store)
+	user2, _ := CreateRandomUser(t, testEnv.Store)
 
-	account1 := CreateRandomAccount(t, testEnv.Store)
-	account2 := CreateRandomAccount(t, testEnv.Store)
+	account1 := CreateRandomAccount(t, testEnv.Store, user1)
+	account2 := CreateRandomAccount(t, testEnv.Store, user2)
 	fmt.Println(">> before: ", account1.Balance, account2.Balance)
 	// run n concurrent transfer transactions
 	n := 10
