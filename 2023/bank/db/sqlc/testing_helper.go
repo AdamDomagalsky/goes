@@ -9,8 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func CreateRandomAccount(t *testing.T, store Store) Account {
-	user, _ := CreateRandomUser(t, store)
+func CreateRandomAccount(t *testing.T, store Store, user User) Account {
 	result, err := store.CreateAccount(context.Background(), CreateAccountParams{
 		Owner:    user.Username,
 		Balance:  util.RandomMoney(),
