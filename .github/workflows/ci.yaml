@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./2023/bank
+        working-directory: ./bank
     services:
       postgres:
         image: postgres:15

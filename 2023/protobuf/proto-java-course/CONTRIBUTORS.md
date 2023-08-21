@@ -1,1 +1,0 @@
-- [Darren Rose](https://github.com/darren-rose)
