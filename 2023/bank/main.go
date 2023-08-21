@@ -21,15 +21,30 @@ func main() {
 	if err != nil {
 		log.Fatal("Cannot connect to db:", err)
 	}
+
 	store := db.NewStore(conn)
 	server, err := api.NewServer(config, store)
 	if err != nil {
 		log.Fatal("Cannot create server:", err)
 	}
 
+	if config.GIN_MODE != "release" {
+		err = db.MigrateUp(conn, config.DATABASE_NAME)
+		if err != nil {
+			if err.Error() != "no change" {
+				log.Fatal(
+					fmt.Sprintf("GIN-%s, MigratingUp(%s) - failed:", config.GIN_MODE, config.DATABASE_NAME),
+					err)
+			} else {
+				log.Printf("GIN-%s, MigratingUp(%s) - no change\n", config.GIN_MODE, config.DATABASE_NAME)
+			}
+		} else {
+			log.Printf("GIN-%s, MigratingUp(%s) - succeed \n", config.GIN_MODE, config.DATABASE_NAME)
+		}
+	}
+
 	err = server.Start(config.SERVER_API_URL)
 	if err != nil {
 		log.Fatal("Cannot start server:", err)
 	}
-
 }

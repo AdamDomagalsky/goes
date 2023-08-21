@@ -23,5 +23,26 @@ services:
     volumes:
       - db-bank:/data/postgres
 
+  bank-api:
+    restart: on-failure:2
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bank-api
+    container_name: bank-api
+    command: sh -c 'echo "waiting for pg-bank:5432..." && wait-for -t 3 pg-bank:5432 -- /app/main || echo "Failed to connect to pg-banks:5432"'
+    depends_on:
+      - pg-bank
+    environment: # override .env values
+      - DATABASE_HOST=pg-bank
+      - GIN_MODE=debug
+      - ACCESS_TOKEN_DURATION=5m
+    env_file: .env
+    volumes:
+      - .env:/app/.env
+    ports:
+      - 8080:8080
+
+
 volumes:
     db-bank:
