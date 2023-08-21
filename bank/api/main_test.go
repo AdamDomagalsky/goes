@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	db "github.com/AdamDomagalsky/goes/2023/bank/db/sqlc"
+	db "github.com/AdamDomagalsky/goes/bank/db/sqlc"
 	"github.com/gin-gonic/gin"
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"

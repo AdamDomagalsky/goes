@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/AdamDomagalsky/goes/2023/bank/util"
+	"github.com/AdamDomagalsky/goes/bank/util"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/lib/pq" // blank import: side-effect init pg driver

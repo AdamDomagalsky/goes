@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/AdamDomagalsky/goes/2023/bank/util"
+	"github.com/AdamDomagalsky/goes/bank/util"
 	"github.com/stretchr/testify/require"
 )
 

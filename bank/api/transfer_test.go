@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	db "github.com/AdamDomagalsky/goes/2023/bank/db/sqlc"
-	"github.com/AdamDomagalsky/goes/2023/bank/token"
-	"github.com/AdamDomagalsky/goes/2023/bank/util"
+	db "github.com/AdamDomagalsky/goes/bank/db/sqlc"
+	"github.com/AdamDomagalsky/goes/bank/token"
+	"github.com/AdamDomagalsky/goes/bank/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )
