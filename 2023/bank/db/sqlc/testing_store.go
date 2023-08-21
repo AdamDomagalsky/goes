@@ -53,7 +53,7 @@ func NewStoreTestStore(path string, testStore *TestStore) *TestStore {
 	}
 
 	pool, conn, resource := setupTestDB(config)
-	err = migrateUp(conn, config.DATABASE_NAME)
+	err = MigrateUp(conn, config.DATABASE_NAME)
 	if err != nil {
 		fmt.Printf("failed migrateUp: %+v\n", err)
 		err = pool.Purge(resource)
@@ -123,7 +123,7 @@ func setupTestDB(config util.Config) (pool *dockertest.Pool, db *sql.DB, resourc
 	return
 }
 
-func migrateUp(db *sql.DB, databaseName string) error {
+func MigrateUp(db *sql.DB, databaseName string) error {
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		return err

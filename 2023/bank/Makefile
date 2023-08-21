@@ -14,7 +14,7 @@ dropdb:
 	docker-compose exec $(DATABASE_NAME) dropdb --username=$(DATABASE_USERNAME) $(DATABASE_NAME) 
 
 # Migrate database up & down lvl
-MIGRATE_COMMAND:=migrate -path ./db/migrations --database "postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@localhost:5432/pg-bank?sslmode=disable" --verbose
+MIGRATE_COMMAND:=migrate -path ./db/migrations --database "${DATABASE_DRVIER}://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}?sslmode=disable" --verbose
 migrateup:
 	$(MIGRATE_COMMAND) up
 migratedown:
@@ -40,5 +40,13 @@ cover:
 
 server:
 	go run main.go
+
+# CLI tools like sqlc, migrate, protobuf
+install-prerequisites-cli:
+	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+build:
+	go build -o main main.go
 
 .PHONY: postgres createdb dropdb migrateup migratedown migratedown1 migrateup1 sqlc test server
