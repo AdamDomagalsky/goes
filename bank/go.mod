@@ -1,4 +1,4 @@
-module github.com/AdamDomagalsky/goes/2023/bank
+module github.com/AdamDomagalsky/goes/bank
 
 go 1.20
 

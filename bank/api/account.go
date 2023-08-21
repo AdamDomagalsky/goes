@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	db "github.com/AdamDomagalsky/goes/2023/bank/db/sqlc"
-	"github.com/AdamDomagalsky/goes/2023/bank/token"
+	db "github.com/AdamDomagalsky/goes/bank/db/sqlc"
+	"github.com/AdamDomagalsky/goes/bank/token"
 	"github.com/gin-gonic/gin"
 	pg "github.com/lib/pq" // blank import: side-effect init pg driver
 )

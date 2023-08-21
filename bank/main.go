@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/AdamDomagalsky/goes/2023/bank/api"
-	db "github.com/AdamDomagalsky/goes/2023/bank/db/sqlc"
-	"github.com/AdamDomagalsky/goes/2023/bank/util"
+	"github.com/AdamDomagalsky/goes/bank/api"
+	db "github.com/AdamDomagalsky/goes/bank/db/sqlc"
+	"github.com/AdamDomagalsky/goes/bank/util"
 	_ "github.com/lib/pq" // blank import: side-effect init pg driver
 )
 

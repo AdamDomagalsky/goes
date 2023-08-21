@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	db "github.com/AdamDomagalsky/goes/2023/bank/db/sqlc"
-	"github.com/AdamDomagalsky/goes/2023/bank/util"
+	db "github.com/AdamDomagalsky/goes/bank/db/sqlc"
+	"github.com/AdamDomagalsky/goes/bank/util"
 	"github.com/gin-gonic/gin"
 	pg "github.com/lib/pq"
 )
