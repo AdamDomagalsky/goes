@@ -16,10 +16,11 @@ type Config struct {
 	DATABASE_PORT     string `mapstructure:"DATABASE_PORT"`
 	DATABASE_USERNAME string `mapstructure:"DATABASE_USERNAME"`
 
-	GIN_MODE              string        `mapstructure:"GIN_MODE"`
-	SERVER_API_URL        string        `mapstructure:"SERVER_API_URL"`
-	SYMMETRIC_KEY         string        `mapstructure:"SYMMETRIC_KEY"`
-	ACCESS_TOKEN_DURATION time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	GIN_MODE               string        `mapstructure:"GIN_MODE"`
+	SERVER_API_URL         string        `mapstructure:"SERVER_API_URL"`
+	SYMMETRIC_KEY          string        `mapstructure:"SYMMETRIC_KEY"`
+	ACCESS_TOKEN_DURATION  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	REFRESH_TOKEN_DURATION time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

@@ -1,3 +1,4 @@
+# https://github.com/sqlc-dev/sqlc
 version: "2"
 sql:
   - engine: "postgresql"
@@ -12,3 +13,10 @@ sql:
         emit_interface: true
         emit_exact_table_names: false
         emit_empty_slices: true
+
+# Why SQLC over ORM?
+# Attribute creep and excessive use of foreign keys requires you to use SQL anyway.
+# if you need to know SQL to use an ORM, why not just use SQL directly?
+# it prevents the need to know how this ORM works (how it translate non-SQL to SQL), and how to use it.
+
+# SQLC is like protobuf for SQL - it generates code from a schema file in to functions.
