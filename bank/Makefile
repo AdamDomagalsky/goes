@@ -1,57 +1,107 @@
+BIN_DIR = bin
+PROTO_DIR = proto
+SERVER_DIR = server
+CLIENT_DIR = client
+
 include .env
 export
 
 COVERAGE_DIR ?= .coverage
 
+ifeq ($(OS), Windows_NT)
+	SHELL := powershell.exe
+	.SHELLFLAGS := -NoProfile -Command
+	SHELL_VERSION = $(shell (Get-Host | Select-Object Version | Format-Table -HideTableHeaders | Out-String).Trim())
+	OS = $(shell "{0} {1}" -f "windows", (Get-ComputerInfo -Property OsVersion, OsArchitecture | Format-Table -HideTableHeaders | Out-String).Trim())
+	PACKAGE = $(shell (Get-Content go.mod -head 1).Split(" ")[1])
+	CHECK_DIR_CMD = if (!(Test-Path $@)) { $$e = [char]27; Write-Error "$$e[31mDirectory $@ doesn't exist$${e}[0m" }
+	HELP_CMD = Select-String "^[a-zA-Z_-]+:.*?\#\# .*$$" "./Makefile" | Foreach-Object { $$_data = $$_.matches -split ":.*?\#\# "; $$obj = New-Object PSCustomObject; Add-Member -InputObject $$obj -NotePropertyName ('Command') -NotePropertyValue $$_data[0]; Add-Member -InputObject $$obj -NotePropertyName ('Description') -NotePropertyValue $$_data[1]; $$obj } | Format-Table -HideTableHeaders @{Expression={ $$e = [char]27; "$$e[36m$$($$_.Command)$${e}[0m" }}, Description
+	RM_F_CMD = Remove-Item -erroraction silentlycontinue -Force
+	RM_RF_CMD = ${RM_F_CMD} -Recurse
+	SERVER_BIN = ${SERVER_DIR}.exe
+	CLIENT_BIN = ${CLIENT_DIR}.exe
+else
+	SHELL := bash
+	SHELL_VERSION = $(shell echo $$BASH_VERSION)
+	UNAME := $(shell uname -s)
+	VERSION_AND_ARCH = $(shell uname -rm)
+	ifeq ($(UNAME),Darwin)
+		OS = macos ${VERSION_AND_ARCH}
+	else ifeq ($(UNAME),Linux)
+		OS = linux ${VERSION_AND_ARCH}
+	else
+		$(error OS not supported by this Makefile)
+	endif
+	PACKAGE = $(shell head -1 go.mod | awk '{print $$2}')
+	CHECK_DIR_CMD = test -d $@ || (echo "\033[31mDirectory $@ doesn't exist\033[0m" && false)
+	HELP_CMD = grep -E '^[a-zA-Z_-]+:.*?\#\# .*$$' $(firstword $(MAKEFILE_LIST)) | awk 'BEGIN {FS = ":.*?\#\# "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	RM_F_CMD = rm -f
+	RM_RF_CMD = ${RM_F_CMD} -r
+	SERVER_BIN = ${SERVER_DIR}
+	CLIENT_BIN = ${CLIENT_DIR}
+endif
 
-postgres:
+postgres: ## Start postgresql docker container 
 	docker-compose up $(DATABASE_NAME) -d
 
-# Create & drop database
-createdb:
+createdb: ## Create database from .env file
 	docker-compose exec $(DATABASE_NAME) createdb --username=$(DATABASE_USERNAME) --owner=$(DATABASE_USERNAME) $(DATABASE_NAME)
-dropdb:
+dropdb: ## Drop database from .env file
 	docker-compose exec $(DATABASE_NAME) dropdb --username=$(DATABASE_USERNAME) $(DATABASE_NAME) 
 
 # Migrate database up & down lvl
 MIGRATE_COMMAND:=migrate -path ./db/migrations --database "${DATABASE_DRVIER}://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}?sslmode=disable" --verbose
-migrateup:
+migrateup: ## Migrate database up to the latest revision
 	$(MIGRATE_COMMAND) up
-migratedown:
+migratedown: ## Migrate database down to the oldest revision
 	$(MIGRATE_COMMAND) down
-migrateup1:
+migrateup1: ## Migrate database up 1 revision
 	$(MIGRATE_COMMAND) up 1
-migratedown1:
+migratedown1: ## Migrate database down 1 revision
 	$(MIGRATE_COMMAND) down 1
 
-db_docs:
+db_docs: ## Generate database documentation
 	dbdocs build db/bank.dbml
-db_schema:
+db_schema: ## Generate database .sql schema
 	dbml2sql --postgres -o db/bank.sql db/bank.dbml
 
-
-sqlc:
+sqlc: # Generate sqlc type-safe boilerplate go code from sql queries
 	sqlc generate
 
-# Test and coverage
-test:
+test: ## Run tests
 	go test -coverprofile $(COVERAGE_DIR)/combined.txt --cover ./...
 
-cover:
+cover: ## Run tests and generate coverage report
 	@-rm -r $(COVERAGE_DIR)
 	@mkdir $(COVERAGE_DIR)
 	make test
 	go tool cover -html=$(COVERAGE_DIR)/combined.txt -o cover.html
 
-server:
+server: ## Run server API
 	go run main.go
 
-# CLI tools like sqlc, migrate, protobuf
-install-prerequisites-cli:
+install-prerequisites-cli: ## Install CLI tools like sqlc, migrate, dbdocs, protobuf
 	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 	npm install -g dbdocs @dbml/cli
-build:
+build: ## Build the binary file
 	go build -o main main.go
 
-.PHONY: postgres createdb dropdb migrateup migratedown migratedown1 migrateup1 sqlc test server db_docs db_schema
+bump: all ## Update packages version
+	go get -u ./...
+
+
+.DEFAULT_GOAL := help
+.PHONY: postgres createdb dropdb migrateup migratedown migratedown1 migrateup1 sqlc test server db_docs db_schema help
+
+about: ## Display info related to the build
+	@echo "OS: ${OS}"
+	@echo "Shell: ${SHELL} ${SHELL_VERSION}"
+	@echo "Protoc version: $(shell protoc --version)"
+	@echo "Go version: $(shell go version)"
+	@echo "Go package: ${PACKAGE}"
+	@echo "Openssl version: $(shell openssl version)"
+
+
+help: ## Show this help
+	@${HELP_CMD}
