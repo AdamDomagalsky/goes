@@ -12,3 +12,6 @@ creating-web-services-go
 # Cover test results
 cover.html
 cover.out
+# Ignore all log files
+*.log
+

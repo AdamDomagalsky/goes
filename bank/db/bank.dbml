@@ -1,3 +1,10 @@
+Project Bank {
+  database_type: 'PostgreSQL'
+  Note: '''
+  This is a bank project
+  '''
+}
+
 Table users as U {
   username varchar [pk]
   password varchar [not null]
@@ -43,4 +50,15 @@ Table transfers {
     to_account_id
     (from_account_id, to_account_id)
   }
+}
+
+Table sessions {
+  id uuid [pk]
+  username varchar [ref: > U.username, not null]
+  refresh_token varchar [not null]
+  user_agent varchar [not null]
+  client_ip varchar [not null]
+  is_blocked bool [not null, default: false]
+  expires_at timestamptz [not null]
+  created_at timestamptz [not null, default: `now()`]
 }

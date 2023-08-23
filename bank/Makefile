@@ -24,6 +24,11 @@ migrateup1:
 migratedown1:
 	$(MIGRATE_COMMAND) down 1
 
+db_docs:
+	dbdocs build db/bank.dbml
+db_schema:
+	dbml2sql --postgres -o db/bank.sql db/bank.dbml
+
 
 sqlc:
 	sqlc generate
@@ -45,8 +50,8 @@ server:
 install-prerequisites-cli:
 	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-
+	npm install -g dbdocs @dbml/cli
 build:
 	go build -o main main.go
 
-.PHONY: postgres createdb dropdb migrateup migratedown migratedown1 migrateup1 sqlc test server
+.PHONY: postgres createdb dropdb migrateup migratedown migratedown1 migrateup1 sqlc test server db_docs db_schema
