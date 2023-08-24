@@ -13,6 +13,9 @@ sql:
         emit_interface: true
         emit_exact_table_names: false
         emit_empty_slices: true
+        output_db_file_name: "db.sql.go"
+        output_models_file_name:  "models.sql.go"
+        output_querier_file_name: "querier.sql.go"
 
 # Why SQLC over ORM?
 # Attribute creep and excessive use of foreign keys requires you to use SQL anyway.
