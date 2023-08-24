@@ -74,6 +74,9 @@ proto: ## Generate protobuf code
 	@-rm -r ${PROTO_DIR}/pb/*.go
 	protoc --proto_path=${PROTO_DIR} -I${PROTO_DIR} --go_opt=module=${PACKAGE} --go_out=. --go-grpc_opt=module=${PACKAGE} --go-grpc_out=. ${PROTO_DIR}/*.proto
 
+evans: ## Run evans CLI tool connected to the GRPC server
+	evans -r repl -p 2137
+
 test: ## Run tests
 	go test -coverprofile $(COVERAGE_DIR)/combined.txt --cover ./...
 
@@ -87,14 +90,20 @@ server: ## Run server API
 	go run main.go
 
 install-prerequisites-cli: ## Install CLI tools like sqlc, migrate, dbdocs, protobuf
+	brew install act
 	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 	npm install -g dbdocs @dbml/cli
+	brew tap ktr0731/evans && brew install evans
+
 build: ## Build the binary file
 	go build -o main main.go
 
 bump: all ## Update packages version
 	go get -u ./...
+
+PR-check: ## Local Github Action run of the Pull Request steps 
+	(cd ../	&& act pull_request)
 
 
 .DEFAULT_GOAL := help
