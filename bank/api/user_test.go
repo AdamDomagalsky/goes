@@ -122,7 +122,7 @@ func TestLoginUserAPI(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
-				require.Contains(t, recorder.Body.String(), "hashedPassword is not the hash of the given password")
+				require.Contains(t, recorder.Body.String(), "'loginUserRequest.Password' Error:Field validation for 'Password' failed on the 'required' tag")
 			},
 		},
 	}
