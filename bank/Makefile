@@ -1,5 +1,6 @@
 BIN_DIR = bin
 PROTO_DIR = proto
+DB_DIR = db
 SERVER_DIR = server
 CLIENT_DIR = client
 
@@ -66,7 +67,12 @@ db_schema: ## Generate database .sql schema
 	dbml2sql --postgres -o db/bank.sql db/bank.dbml
 
 sqlc: # Generate sqlc type-safe boilerplate go code from sql queries
+	@-rm -r ${DB_DIR}/sqlc/*.go
 	sqlc generate
+
+proto: ## Generate protobuf code
+	@-rm -r ${PROTO_DIR}/pb/*.go
+	protoc --proto_path=${PROTO_DIR} -I${PROTO_DIR} --go_opt=module=${PACKAGE} --go_out=. --go-grpc_opt=module=${PACKAGE} --go-grpc_out=. ${PROTO_DIR}/*.proto
 
 test: ## Run tests
 	go test -coverprofile $(COVERAGE_DIR)/combined.txt --cover ./...
@@ -92,7 +98,7 @@ bump: all ## Update packages version
 
 
 .DEFAULT_GOAL := help
-.PHONY: postgres createdb dropdb migrateup migratedown migratedown1 migrateup1 sqlc test server db_docs db_schema help
+.PHONY: postgres createdb dropdb migrateup migratedown migratedown1 migrateup1 sqlc test server db_docs db_schema help proto build bump
 
 about: ## Display info related to the build
 	@echo "OS: ${OS}"
