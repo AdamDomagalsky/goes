@@ -67,7 +67,7 @@ db_schema: ## Generate database .sql schema
 	dbml2sql --postgres -o db/bank.sql db/bank.dbml
 
 sqlc: # Generate sqlc type-safe boilerplate go code from sql queries
-	@-rm -r ${DB_DIR}/sqlc/*.go
+	@-rm -r ${DB_DIR}/sqlc/*.sql.go
 	sqlc generate
 
 proto: ## Generate protobuf code
