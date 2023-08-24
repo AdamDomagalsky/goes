@@ -1,15 +1,17 @@
-package api
+package gapi
 
 import (
 	db "github.com/AdamDomagalsky/goes/bank/db/sqlc"
+	"github.com/AdamDomagalsky/goes/bank/proto/pb"
 	"github.com/AdamDomagalsky/goes/bank/token"
 	"github.com/AdamDomagalsky/goes/bank/util"
 )
 
 type Server struct {
-	store      db.Store
-	config     util.Config
-	tokenMaker token.Maker
+	pb.UnimplementedBankServer // TODO use it to be able gradually implement grpc methods
+	store                      db.Store
+	config                     util.Config
+	tokenMaker                 token.Maker
 }
 
 func NewServer(config util.Config, store db.Store) (*Server, error) {

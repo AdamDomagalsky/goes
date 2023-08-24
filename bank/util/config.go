@@ -17,7 +17,8 @@ type Config struct {
 	DATABASE_USERNAME string `mapstructure:"DATABASE_USERNAME"`
 
 	GIN_MODE               string        `mapstructure:"GIN_MODE"`
-	SERVER_API_URL         string        `mapstructure:"SERVER_API_URL"`
+	HTTP_SERVER_ADDRESS    string        `mapstructure:"HTTP_SERVER_ADDRESS"`
+	GRPC_SERVER_ADDRESS    string        `mapstructure:"GRPC_SERVER_ADDRESS"`
 	SYMMETRIC_KEY          string        `mapstructure:"SYMMETRIC_KEY"`
 	ACCESS_TOKEN_DURATION  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	REFRESH_TOKEN_DURATION time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`

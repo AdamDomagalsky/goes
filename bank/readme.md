@@ -3,5 +3,8 @@
 
 ## Prerequisites tools to install
 
-- https://github.com/golang-migrate/migrate
-- https://docs.sqlc.dev/en/latest/overview/install.html
+- SQL migration toolhttps://github.com/golang-migrate/migrate
+- SQL code generation https://docs.sqlc.dev/en/latest/overview/install.html
+- Github Action local run: https://github.com/nektos/act
+- gRPC+Proto https://grpc.io/docs/languages/go/quickstart/
+- evans for gRPC inspection https://github.com/ktr0731/evans#macos
