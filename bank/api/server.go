@@ -16,7 +16,7 @@ type Server struct {
 	tokenMaker token.Maker
 }
 
-func NewServer(config util.Config, store db.Store) (*Server, error) {
+func NewServer(config util.Config, store db.Store) (*Servcaner, error) {
 
 	tokenMaker, err := token.NewPASETOMaker(config.SYMMETRIC_KEY)
 	// tokenMaker, err := token.NewJWTMaker(config.SYMMETRIC_KEY)

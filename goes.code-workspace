@@ -1,7 +1,14 @@
 {
     "folders": [
         {
-            "path": "."
-        }
-    ]
+            "path": "bank",
+        },
+    ],
+    "settings": {
+        "protoc": {
+            "options": [
+                "--proto_path=${workspaceRoot}/bank/proto",
+            ]
+        },
+    }
 }
