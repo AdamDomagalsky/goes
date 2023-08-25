@@ -74,7 +74,7 @@ proto: ## Generate protobuf code
 	@-rm -r ${PROTO_DIR}/pb/*.go
 	protoc --proto_path=${PROTO_DIR} -I${PROTO_DIR} --go_out=. --go-grpc_out=. \
 		--go_opt=module=${PACKAGE} --go-grpc_opt=module=${PACKAGE}  \
-		--grpc-gateway_out=${PROTO_DIR} \
+		--grpc-gateway_out=${PROTO_DIR}/pb \
 		--grpc-gateway_opt logtostderr=true \
 		--grpc-gateway_opt paths=source_relative \
 		${PROTO_DIR}/*.proto
