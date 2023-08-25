@@ -110,7 +110,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, accessTokePayload, err := server.tokenMaker.CreateToken(
+	accessToken, accessTokenPayload, err := server.tokenMaker.CreateToken(
 		user.Username,
 		server.config.ACCESS_TOKEN_DURATION,
 	)
@@ -145,7 +145,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	resp := loginUserResponse{
 		SessionID:              session.ID,
 		AccessToken:            accessToken,
-		AccessTokenExpieresAt:  accessTokePayload.ExpiresAt,
+		AccessTokenExpieresAt:  accessTokenPayload.ExpiresAt,
 		RefreshToken:           refreshToken,
 		RefreshTokenExpieresAt: refreshTokenPayload.ExpiresAt,
 		User:                   newUserResponse(user),
