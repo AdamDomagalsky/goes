@@ -8,3 +8,4 @@
 - Github Action local run: https://github.com/nektos/act
 - gRPC+Proto https://grpc.io/docs/languages/go/quickstart/
 - evans for gRPC inspection https://github.com/ktr0731/evans#macos
+- gRPC Gateway https://github.com/grpc-ecosystem/grpc-gateway#2-with-custom-annotations
