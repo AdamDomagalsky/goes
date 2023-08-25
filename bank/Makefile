@@ -72,11 +72,15 @@ sqlc: # Generate sqlc type-safe boilerplate go code from sql queries
 
 proto: ## Generate protobuf code
 	@-rm -r ${PROTO_DIR}/pb/*.go
+	@-rm -r docs/swagger/*.swagger.json
 	protoc --proto_path=${PROTO_DIR} -I${PROTO_DIR} --go_out=. --go-grpc_out=. \
 		--go_opt=module=${PACKAGE} --go-grpc_opt=module=${PACKAGE}  \
 		--grpc-gateway_out=${PROTO_DIR}/pb \
 		--grpc-gateway_opt logtostderr=true \
 		--grpc-gateway_opt paths=source_relative \
+		--openapiv2_out docs/swagger \
+   		--openapiv2_opt logtostderr=true --openapiv2_opt allow_merge=true \
+   		--openapiv2_opt merge_file_name=api_spec \
 		${PROTO_DIR}/*.proto
 
 evans: ## Run evans CLI tool connected to the GRPC server
