@@ -78,7 +78,7 @@ proto: ## Generate protobuf code
 		--grpc-gateway_out=${PROTO_DIR}/pb \
 		--grpc-gateway_opt logtostderr=true \
 		--grpc-gateway_opt paths=source_relative \
-		--openapiv2_out docs/swagger \
+		--openapiv2_out docs/swagger/dist \
    		--openapiv2_opt logtostderr=true --openapiv2_opt allow_merge=true \
    		--openapiv2_opt merge_file_name=api_spec \
 		${PROTO_DIR}/*.proto
