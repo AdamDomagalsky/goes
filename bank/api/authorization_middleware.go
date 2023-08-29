@@ -7,18 +7,13 @@ import (
 	"strings"
 
 	"github.com/AdamDomagalsky/goes/bank/token"
+	"github.com/AdamDomagalsky/goes/bank/util"
 	"github.com/gin-gonic/gin"
-)
-
-const (
-	authorizationHeaderKey  = "authorization"
-	authorizationTypeKey    = "bearer" // the only type supported now
-	authorizationPayloadKey = "authorization_payload"
 )
 
 func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
+		authorizationHeader := ctx.GetHeader(util.AuthorizationHeaderKey)
 		if len(authorizationHeader) == 0 {
 			err := errors.New("authorization header not provided")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
@@ -29,7 +24,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
 		}
 		authorizationType := strings.ToLower(fields[0])
-		if authorizationType != authorizationTypeKey {
+		if authorizationType != util.AuthorizationTypeKey {
 			err := fmt.Errorf("invalid authorization header type: %s", authorizationType)
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
 		}
@@ -39,7 +34,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
 		}
 
-		ctx.Set(authorizationPayloadKey, payload)
+		ctx.Set(util.AuthorizationPayloadKey, payload)
 		ctx.Next()
 	}
 }

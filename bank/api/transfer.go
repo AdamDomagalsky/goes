@@ -8,6 +8,7 @@ import (
 
 	db "github.com/AdamDomagalsky/goes/bank/db/sqlc"
 	"github.com/AdamDomagalsky/goes/bank/token"
+	"github.com/AdamDomagalsky/goes/bank/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,7 +30,7 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 	if !valid {
 		return
 	}
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(util.AuthorizationPayloadKey).(*token.Payload)
 
 	if authPayload.Username != fromAccount.Owner {
 		err := errors.New("from account does not belong to authenticated user")
