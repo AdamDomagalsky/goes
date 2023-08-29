@@ -63,16 +63,18 @@ UPDATE users
 SET
     full_name = COALESCE($1, full_name),
     email = COALESCE($2, email),
-    password = COALESCE($3, password)
-WHERE username = $4
+    password = COALESCE($3, password),
+    password_changed_at = COALESCE($4, password_changed_at)
+WHERE username = $5
 RETURNING username, password, full_name, email, password_changed_at, created_at
 `
 
 type UpdateUserParams struct {
-	FullName sql.NullString `json:"full_name"`
-	Email    sql.NullString `json:"email"`
-	Password sql.NullString `json:"password"`
-	Username string         `json:"username"`
+	FullName          sql.NullString `json:"full_name"`
+	Email             sql.NullString `json:"email"`
+	Password          sql.NullString `json:"password"`
+	PasswordChangedAt sql.NullTime   `json:"password_changed_at"`
+	Username          string         `json:"username"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
@@ -80,6 +82,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.FullName,
 		arg.Email,
 		arg.Password,
+		arg.PasswordChangedAt,
 		arg.Username,
 	)
 	var i User

@@ -9,7 +9,8 @@ UPDATE users
 SET
     full_name = COALESCE(sqlc.narg(full_name), full_name),
     email = COALESCE(sqlc.narg(email), email),
-    password = COALESCE(sqlc.narg(password), password)
+    password = COALESCE(sqlc.narg(password), password),
+    password_changed_at = COALESCE(sqlc.narg(password_changed_at), password_changed_at)
 WHERE username = sqlc.arg(username)
 RETURNING *;
 
