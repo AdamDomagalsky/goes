@@ -28,6 +28,8 @@
   "paths": {
     "/v1/create_user": {
       "post": {
+        "summary": "Creates a new user",
+        "description": "Use this API to create a new user",
         "operationId": "Bank_CreateUser",
         "responses": {
           "200": {
@@ -60,6 +62,8 @@
     },
     "/v1/login_user": {
       "post": {
+        "summary": "Login user",
+        "description": "Use this API to login a user, get access token \u0026 refresh token",
         "operationId": "Bank_LoginUser",
         "responses": {
           "200": {
