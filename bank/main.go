@@ -3,10 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
+	"embed"
 	"fmt"
+	"io/fs"
 	"log"
 	"net"
 	"net/http"
+
+	_ "embed"
 
 	"github.com/AdamDomagalsky/goes/bank/api"
 	db "github.com/AdamDomagalsky/goes/bank/db/sqlc"
@@ -19,6 +23,9 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/encoding/protojson"
 )
+
+//go:embed docs/swagger/dist/*
+var swaggerFiles embed.FS
 
 func main() {
 	config, err := util.LoadConfig(".")
@@ -114,8 +121,25 @@ func runGrpcGatewayAPIServer(config util.Config, store db.Store) {
 	mux := http.NewServeMux()
 	mux.Handle("/", grpcMux)
 
-	fs := http.FileServer(http.Dir("./docs/swagger/dist"))
-	mux.Handle("/swagger/", http.StripPrefix("/swagger/", fs))
+	swaggerPath := "docs/swagger/dist"
+	// any change will be reflected immediately as it server files from disk (not embedded)
+	// http://localhost:2138/swagger/
+	indexFsDynamicDir := http.FileServer(http.Dir(swaggerPath))
+	mux.Handle("/swagger/", http.StripPrefix("/swagger/", indexFsDynamicDir))
+
+	// any change will be reflected after recompilation as it embeds files into binary
+	// http://localhost:2138/swagger-embedded/
+	indexFsEmbedded, err := fs.Sub(swaggerFiles, swaggerPath)
+	if err != nil {
+		log.Fatalf("cannot get subdirectory %v\n", err)
+	}
+	mux.Handle(
+		"/swagger-embedded/",
+		http.StripPrefix(
+			"/swagger-embedded/",
+			http.FileServer(http.FS(indexFsEmbedded)),
+		),
+	)
 
 	listener, err := net.Listen("tcp", config.GRPC_API_GATEWAY_SERVER_ADDRESS)
 	if err != nil {
