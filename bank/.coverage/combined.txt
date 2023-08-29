@@ -43,10 +43,10 @@ github.com/AdamDomagalsky/goes/bank/token/payload.go:27.2,34.21 2 1
 github.com/AdamDomagalsky/goes/bank/token/payload.go:37.39,38.41 1 1
 github.com/AdamDomagalsky/goes/bank/token/payload.go:38.41,40.3 1 1
 github.com/AdamDomagalsky/goes/bank/token/payload.go:41.2,41.12 1 1
-github.com/AdamDomagalsky/goes/bank/util/config.go:26.57,33.16 6 0
-github.com/AdamDomagalsky/goes/bank/util/config.go:33.16,35.3 1 0
-github.com/AdamDomagalsky/goes/bank/util/config.go:37.2,38.8 2 0
-github.com/AdamDomagalsky/goes/bank/util/config.go:41.34,49.2 1 0
+github.com/AdamDomagalsky/goes/bank/util/config.go:28.57,35.16 6 0
+github.com/AdamDomagalsky/goes/bank/util/config.go:35.16,37.3 1 0
+github.com/AdamDomagalsky/goes/bank/util/config.go:39.2,40.8 2 0
+github.com/AdamDomagalsky/goes/bank/util/config.go:43.34,51.2 1 0
 github.com/AdamDomagalsky/goes/bank/util/currency.go:10.48,11.18 1 0
 github.com/AdamDomagalsky/goes/bank/util/currency.go:12.26,13.14 1 0
 github.com/AdamDomagalsky/goes/bank/util/currency.go:15.2,15.14 1 0
@@ -295,5 +295,7 @@ github.com/AdamDomagalsky/goes/bank/db/sqlc/transfer.sql.go:88.37,90.3 1 0
 github.com/AdamDomagalsky/goes/bank/db/sqlc/transfer.sql.go:91.2,91.35 1 0
 github.com/AdamDomagalsky/goes/bank/db/sqlc/transfer.sql.go:91.35,93.3 1 0
 github.com/AdamDomagalsky/goes/bank/db/sqlc/transfer.sql.go:94.2,94.19 1 0
-github.com/AdamDomagalsky/goes/bank/db/sqlc/user.sql.go:23.87,40.2 4 1
-github.com/AdamDomagalsky/goes/bank/db/sqlc/user.sql.go:46.79,58.2 4 0
+github.com/AdamDomagalsky/goes/bank/db/sqlc/user.sql.go:24.87,41.2 4 1
+github.com/AdamDomagalsky/goes/bank/db/sqlc/user.sql.go:47.79,59.2 4 1
+github.com/AdamDomagalsky/goes/bank/db/sqlc/user.sql.go:78.87,95.2 4 1
+github.com/AdamDomagalsky/goes/bank/db/sqlc/user.sql.go:127.109,147.2 4 1

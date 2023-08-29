@@ -17,6 +17,7 @@ import (
 	"github.com/AdamDomagalsky/goes/bank/gapi"
 	"github.com/AdamDomagalsky/goes/bank/proto/pb"
 	"github.com/AdamDomagalsky/goes/bank/util"
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	_ "github.com/lib/pq" // blank import: side-effect init pg driver
 	"google.golang.org/grpc"
@@ -41,7 +42,7 @@ func main() {
 	if config.GIN_MODE != "release" { // TODO generalize flag to work Gin <> Grpc wise
 		err = db.MigrateUp(conn, config.DATABASE_NAME)
 		if err != nil {
-			if err.Error() != "no change" {
+			if err != migrate.ErrNoChange {
 				log.Fatal(
 					fmt.Sprintf("GIN-%s, MigratingUp(%s) - failed:", config.GIN_MODE, config.DATABASE_NAME),
 					err)
