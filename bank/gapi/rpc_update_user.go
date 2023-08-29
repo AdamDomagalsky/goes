@@ -14,10 +14,21 @@ import (
 )
 
 func (server *Server) UpdateUser(ctx context.Context, in *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
-	// TODO: add authentication
+	// 2 ways to auth user: interceptor or within handler method
+	// gRPC interceptor in our case is no-go as we want to auth on gRPC as well as on HTTP GW API
+	// if we implement it here in RPC handler method, it will work in both cases
+	authPayload, err := server.authorizeUser(ctx)
+	if err != nil {
+		return nil, unauthenticatedError(err)
+	}
+
 	violations := validateUpdateUserRequest(in)
 	if violations != nil {
 		return nil, invalidArgumentError(violations)
+	}
+
+	if authPayload.Username != in.GetUsername() {
+		return nil, status.Errorf(codes.PermissionDenied, "cannot update other user's info")
 	}
 
 	args := db.UpdateUserParams{
@@ -46,6 +57,7 @@ func (server *Server) UpdateUser(ctx context.Context, in *pb.UpdateUserRequest) 
 			Valid: true,
 		}
 	}
+
 	user, err := server.store.UpdateUser(ctx, args)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -61,17 +73,17 @@ func validateUpdateUserRequest(in *pb.UpdateUserRequest) (violations []*errdetai
 	if err := ValidateUsername(in.GetUsername()); err != nil {
 		violations = append(violations, fieldViolation("username", err))
 	}
-	if in.Password != nil {
+	if in.Fullname != nil {
 		if err := ValidateFullname(in.GetFullname()); err != nil {
 			violations = append(violations, fieldViolation("fullname", err))
 		}
 	}
-	if in.Fullname != nil {
+	if in.Email != nil {
 		if err := ValidateEmail(in.GetEmail()); err != nil {
 			violations = append(violations, fieldViolation("email", err))
 		}
 	}
-	if in.Email != nil {
+	if in.Password != nil {
 		if err := ValidatePassword(in.GetPassword()); err != nil {
 			violations = append(violations, fieldViolation("password", err))
 		}

@@ -114,6 +114,7 @@ func runGrpcGatewayAPIServer(config util.Config, store db.Store) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// pb.RegisterBankHandlerFromEndpoint(...) // TODO split GW to separate service, see: https://blog.logrocket.com/guide-to-grpc-gateway/)
 	err = pb.RegisterBankHandlerServer(ctx, grpcMux, server)
 	if err != nil {
 		log.Fatal("cannot register handler server")
