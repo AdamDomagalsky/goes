@@ -6,6 +6,7 @@ import (
 	db "github.com/AdamDomagalsky/goes/bank/db/sqlc"
 	"github.com/AdamDomagalsky/goes/bank/proto/pb"
 	"github.com/AdamDomagalsky/goes/bank/util"
+	pg "github.com/lib/pq"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,12 +35,19 @@ func (server *Server) CreateUser(ctx context.Context, in *pb.CreateUserRequest) 
 		return nil, status.Errorf(codes.Internal, "cannot hash password: %v", err)
 	}
 	user, err := server.store.CreateUser(ctx, db.CreateUserParams{
-		Username: in.GetUsername(),
-		FullName: in.GetFullname(),
 		Email:    in.GetEmail(),
+		FullName: in.GetFullname(),
 		Password: hashedPassword,
+		Username: in.GetUsername(),
 	})
 	if err != nil {
+		if pgErr, ok := err.(*pg.Error); ok {
+			switch pgErr.Code.Name() {
+			case "unique_violation":
+				// ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return nil, status.Errorf(codes.AlreadyExists, "cannot create user: %v", err)
+			}
+		}
 		return nil, status.Errorf(codes.Internal, "cannot create user: %v", err)
 	}
 
