@@ -32,7 +32,7 @@ func TestCreateAccountAPI(t *testing.T) {
 				"currency": util.USD,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeKey, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, recorder.Code)
@@ -55,7 +55,7 @@ func TestCreateAccountAPI(t *testing.T) {
 				"currency": "customCurrency",
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeKey, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -69,7 +69,7 @@ func TestCreateAccountAPI(t *testing.T) {
 				"currency": util.USD,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeKey, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user.Username, time.Minute)
 				testStore.Store.CreateAccount(context.Background(), db.CreateAccountParams{
 					Owner:    user.Username,
 					Balance:  0,
@@ -114,7 +114,7 @@ func TestGetAccountAPI(t *testing.T) {
 			name:      "OK",
 			accountID: account.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeKey, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -125,7 +125,7 @@ func TestGetAccountAPI(t *testing.T) {
 			name:      "ExpiredAuthToken",
 			accountID: account.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeKey, user.Username, -time.Hour)
+				addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user.Username, -time.Hour)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, recorder.Code)
@@ -136,7 +136,7 @@ func TestGetAccountAPI(t *testing.T) {
 			name:      "NotFound-Unauthorized",
 			accountID: account.ID + 3432423433,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeKey, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, recorder.Code)
@@ -146,7 +146,7 @@ func TestGetAccountAPI(t *testing.T) {
 			name:      "ID less than 1",
 			accountID: -account.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeKey, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)

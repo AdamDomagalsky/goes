@@ -61,7 +61,7 @@ func TestCreateTransferAPI(t *testing.T) {
 		// 		"currency":        util.USD,
 		// 	},
 		// 	setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-		// 		addAuthorization(t, request, tokenMaker, authorizationTypeKey, user1.Username, time.Minute)
+		// 		addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user1.Username, time.Minute)
 		// 	},
 		// 	checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 		// 		require.Equal(t, http.StatusCreated, recorder.Code)
@@ -76,7 +76,7 @@ func TestCreateTransferAPI(t *testing.T) {
 				"currency":        util.USD,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeKey, user1.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user1.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
@@ -91,7 +91,7 @@ func TestCreateTransferAPI(t *testing.T) {
 				"currency":        util.USD,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeKey, user1.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user1.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
@@ -106,7 +106,7 @@ func TestCreateTransferAPI(t *testing.T) {
 				"currency":        util.USD,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeKey, user1.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user1.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -124,7 +124,7 @@ func TestCreateTransferAPI(t *testing.T) {
 				"currency":        util.EUR,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeKey, user1.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user1.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -140,7 +140,7 @@ func TestCreateTransferAPI(t *testing.T) {
 				"currency":        util.EUR,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeKey, user1.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthorizationTypeKey, user1.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
