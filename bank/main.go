@@ -155,7 +155,8 @@ func runGrpcGatewayAPIServer(config util.Config, store db.Store) {
 
 	log.Printf("start HTTP gRPC Gateway REST API server at %s\n", listener.Addr().String())
 
-	if err != http.Serve(listener, mux) {
+	wrappedMusLoggerHandler := gapi.HttpLogger(mux)
+	if err != http.Serve(listener, wrappedMusLoggerHandler) {
 		log.Fatalf("Failed to serve HTTP gRPC Gateway REST API: %v\n", err)
 	}
 }

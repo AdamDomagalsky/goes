@@ -3,6 +3,7 @@ package gapi
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 
 // another way: https://github.com/grpc-ecosystem/go-grpc-middleware/blob/main/interceptors/logging/examples/zap/example_test.go
 
+// 0log logger
 func Setup0logGrpcLogger(env string) []grpc.ServerOption {
 	if env == "development" {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
@@ -56,6 +58,52 @@ func grpcLogger(
 	return result, err
 }
 
+type ResponseRecorder struct {
+	http.ResponseWriter
+	StatusCode int
+	Body       []byte
+}
+
+func (r *ResponseRecorder) WriteHeader(statusCode int) {
+	r.StatusCode = statusCode
+	r.ResponseWriter.WriteHeader(statusCode) // call original WriteHeader
+}
+
+func (r *ResponseRecorder) Write(body []byte) (int, error) {
+	r.Body = body
+	return r.ResponseWriter.Write(body)
+}
+
+func HttpLogger(handler http.Handler) http.Handler {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		startTime := time.Now()
+		rec := &ResponseRecorder{
+			ResponseWriter: w,
+			StatusCode:     http.StatusOK,
+		}
+		handler.ServeHTTP(rec, r)
+		duration := time.Since(startTime)
+		logger := log.Info()
+
+		if rec.StatusCode >= 400 {
+			logger = log.Error().Bytes("body", rec.Body)
+		}
+
+		logger.
+			Str("protocol", "http").
+			Str("method", r.Method).
+			Str("path", r.RequestURI).
+			Str("url", r.URL.String()).
+			Int("status_code", rec.StatusCode).
+			Str("status_text", http.StatusText(rec.StatusCode)).
+			Dur("duration", duration).
+			Msg("received a HTTP (gRPC GW) request")
+
+	})
+}
+
+// ZAP logger
 func InterceptorLogger(l *zap.Logger) logging.Logger {
 	return logging.LoggerFunc(func(ctx context.Context, lvl logging.Level, msg string, fields ...any) {
 		f := make([]zap.Field, 0, len(fields)/2)
