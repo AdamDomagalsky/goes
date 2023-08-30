@@ -1,0 +1,139 @@
+package gapi
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"time"
+
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+// another way: https://github.com/grpc-ecosystem/go-grpc-middleware/blob/main/interceptors/logging/examples/zap/example_test.go
+
+func Setup0logGrpcLogger(env string) []grpc.ServerOption {
+	if env == "development" {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
+
+	return []grpc.ServerOption{grpc.UnaryInterceptor(grpcLogger)}
+}
+
+func grpcLogger(
+	ctx context.Context,
+	req interface{},
+	info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler,
+) (resp interface{}, err error) {
+	startTime := time.Now()
+	result, err := handler(ctx, req)
+	duration := time.Since(startTime)
+
+	statusCode := codes.Unknown
+	if st, ok := status.FromError(err); ok {
+		statusCode = st.Code()
+	}
+
+	logger := log.Info()
+	if err != nil {
+		logger = log.Error().Err(err)
+	}
+
+	logger.Str("protocol", "grpc").
+		Str("method", info.FullMethod).
+		Int("status_code", int(statusCode)).
+		Str("status_text", statusCode.String()).
+		Dur("duration", duration).
+		Msg("received a gRPC request")
+
+	return result, err
+}
+
+func InterceptorLogger(l *zap.Logger) logging.Logger {
+	return logging.LoggerFunc(func(ctx context.Context, lvl logging.Level, msg string, fields ...any) {
+		f := make([]zap.Field, 0, len(fields)/2)
+
+		for i := 0; i < len(fields); i += 2 {
+			key := fields[i]
+			value := fields[i+1]
+
+			switch v := value.(type) {
+			case string:
+				f = append(f, zap.String(key.(string), v))
+			case int:
+				f = append(f, zap.Int(key.(string), v))
+			case bool:
+				f = append(f, zap.Bool(key.(string), v))
+			default:
+				f = append(f, zap.Any(key.(string), v))
+			}
+		}
+
+		logger := l.WithOptions(zap.AddCallerSkip(1)).With(f...)
+
+		switch lvl {
+		case logging.LevelDebug:
+			logger.Debug(msg)
+		case logging.LevelInfo:
+			logger.Info(msg)
+		case logging.LevelWarn:
+			logger.Warn(msg)
+		case logging.LevelError:
+			logger.Error(msg)
+		default:
+			panic(fmt.Sprintf("unknown level %v", lvl))
+		}
+	})
+}
+
+func SetupZapGrpcLogger(env string) (serverOption []grpc.ServerOption, err error) {
+
+	var logger *zap.Logger
+	var opts []logging.Option
+	if env == "development" {
+		conf := zap.NewDevelopmentConfig()
+		conf.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		logger, err = conf.Build()
+		if err != nil {
+			return nil, err
+		}
+		opts = []logging.Option{
+			logging.WithLogOnEvents(logging.StartCall, logging.FinishCall),
+			// Add any other option (check functions starting with logging.With).
+		}
+	} else {
+		logger, err = zap.NewProduction()
+		if err != nil {
+			return nil, err
+		}
+		defer logger.Sync() // flushes buffer, if any
+		// sugar := logger.Sugar()
+		// sugar.Infow("failed to fetch URL",
+		// 	// Structured context as loosely typed key-value pairs.
+		// 	"url", url,
+		// 	"attempt", 3,
+		// 	"backoff", time.Second,
+		// )
+		// sugar.Infof("Failed to fetch URL: %s", url)
+	}
+
+	serverOption = []grpc.ServerOption{
+		grpc.ChainUnaryInterceptor(
+			logging.UnaryServerInterceptor(InterceptorLogger(logger), opts...),
+			// Add any other interceptor you want.
+		),
+		grpc.ChainStreamInterceptor(
+			logging.StreamServerInterceptor(InterceptorLogger(logger), opts...),
+			// Add any other interceptor you want.
+		),
+	}
+
+	return
+}

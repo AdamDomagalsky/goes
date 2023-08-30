@@ -4,13 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	_ "embed"
 	"fmt"
 	"io/fs"
 	"log"
 	"net"
 	"net/http"
-
-	_ "embed"
 
 	"github.com/AdamDomagalsky/goes/bank/api"
 	db "github.com/AdamDomagalsky/goes/bank/db/sqlc"
@@ -82,7 +81,13 @@ func runGrpcAPIServer(config util.Config, store db.Store) {
 		log.Fatalf("could not create grpc server: %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
+	serverOption := gapi.Setup0logGrpcLogger(config.ENVIROMENT)
+	// serverOption, err := gapi.SetupZapGrpcLogger(config.ENVIROMENT)
+	if err != nil {
+		log.Fatalf("could not setup the logger: %v", err)
+	}
+	grpcServer := grpc.NewServer(serverOption...)
+
 	pb.RegisterBankServer(grpcServer, server)
 	reflection.Register(grpcServer) // TODO kind of self documentation
 

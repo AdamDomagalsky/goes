@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	ENVIROMENT        string `mapstructure:"ENVIROMENT"`
 	DATABASE_DRVIER   string `mapstructure:"DATABASE_DRVIER"`
 	DATABASE_HOST     string `mapstructure:"DATABASE_HOST"`
 	DATABASE_NAME     string `mapstructure:"DATABASE_NAME"`
