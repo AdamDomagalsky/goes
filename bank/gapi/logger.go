@@ -17,7 +17,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// another way: https://github.com/grpc-ecosystem/go-grpc-middleware/blob/main/interceptors/logging/examples/zap/example_test.go
+// TODO: try slog as it's official in 1.22
+//  golang.org/x/exp/slog
+//  https://github.com/grpc-ecosystem/go-grpc-middleware/blob/main/interceptors/logging/examples/slog/example_test.go
+// https://go.googlesource.com/proposal/+/master/design/56345-structured-logging.md
+// https://github.com/golang/go/issues/56345
 
 // 0log logger
 func Setup0logGrpcLogger(env string) []grpc.ServerOption {

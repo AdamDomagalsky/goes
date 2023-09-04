@@ -24,6 +24,8 @@ type Config struct {
 	SYMMETRIC_KEY                   string        `mapstructure:"SYMMETRIC_KEY"`
 	ACCESS_TOKEN_DURATION           time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	REFRESH_TOKEN_DURATION          time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+
+	REMOTE_CACHE_ENABLED bool `mapstructure:"REMOTE_CACHE_ENABLED"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

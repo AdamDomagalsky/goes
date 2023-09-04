@@ -12,6 +12,7 @@ import (
 	"net/http"
 
 	"github.com/AdamDomagalsky/goes/bank/api"
+	kesh "github.com/AdamDomagalsky/goes/bank/cache"
 	db "github.com/AdamDomagalsky/goes/bank/db/sqlc"
 	"github.com/AdamDomagalsky/goes/bank/gapi"
 	"github.com/AdamDomagalsky/goes/bank/proto/pb"
@@ -19,6 +20,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	_ "github.com/lib/pq" // blank import: side-effect init pg driver
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -53,10 +55,24 @@ func main() {
 		}
 	}
 
+	var cache kesh.Cache
+	if config.REMOTE_CACHE_ENABLED {
+		cache, err = kesh.NewRedisCache(&redis.Options{
+			Addr: "localhost:6379", // TODO move to config
+		})
+		if err != nil {
+			log.Fatal("remote cache failed:", err)
+		}
+	} else {
+		cache, _ = kesh.NewNullCache()
+		log.Println("remote cache disabled")
+	}
+	cache.Del(context.Background(), "key1", "key2")
+
 	store := db.NewStore(conn)
 	go runGinAPIServer(config, store) // run GIN API server in separate goroutine
-	go runGrpcAPIServer(config, store)
-	runGrpcGatewayAPIServer(config, store)
+	go runGrpcAPIServer(config, store, cache)
+	runGrpcGatewayAPIServer(config, store, cache)
 }
 
 func runGinAPIServer(config util.Config, store db.Store) {
@@ -71,12 +87,12 @@ func runGinAPIServer(config util.Config, store db.Store) {
 	}
 }
 
-func runGrpcAPIServer(config util.Config, store db.Store) {
+func runGrpcAPIServer(config util.Config, store db.Store, cache kesh.Cache) {
 	listener, err := net.Listen("tcp", config.GRPC_SERVER_ADDRESS)
 	if err != nil {
 		log.Fatalf("Failed to listen on: %v\n", err)
 	}
-	server, err := gapi.NewServer(config, store)
+	server, err := gapi.NewServer(config, store, cache)
 	if err != nil {
 		log.Fatalf("could not create grpc server: %v", err)
 	}
@@ -98,8 +114,8 @@ func runGrpcAPIServer(config util.Config, store db.Store) {
 	}
 }
 
-func runGrpcGatewayAPIServer(config util.Config, store db.Store) {
-	server, err := gapi.NewServer(config, store)
+func runGrpcGatewayAPIServer(config util.Config, store db.Store, cache kesh.Cache) {
+	server, err := gapi.NewServer(config, store, cache) // TODO add cache
 	if err != nil {
 		log.Fatalf("could not create grpc server: %v", err)
 	}

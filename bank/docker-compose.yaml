@@ -11,6 +11,28 @@ x-pg: &pg-template
   restart: unless-stopped
 
 services:
+  redis:
+    image: redis:7.2
+    container_name: redis
+    ports:
+      - 6379:6379
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    depends_on:
+      - redis
+    ports:
+      - 8001:8001
+    environment:
+      - REDIS_PASSWORD=changeme
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    depends_on:
+      - redis
+    # environment:
+    #   - GF_SECURITY_ADMIN_PASSWORD=changeme
+
   pg-bank:
     <<: *pg-template
     env_file: ./.env

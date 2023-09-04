@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package pb;
+import "user.proto";
+option go_package = "github.com/AdamDomagalsky/goes/bank/proto/pb";
+
+message ListUsersResponse {
+    repeated User user = 1;
+}

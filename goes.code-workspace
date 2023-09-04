@@ -1,8 +1,11 @@
 {
     "folders": [
         {
-            "path": "bank",
+            "path": "bank"
         },
+        {
+            "path": "worker"
+        }
     ],
     "settings": {
         "protoc": {
