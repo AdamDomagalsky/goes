@@ -1,6 +1,7 @@
 package jejdis
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -60,4 +61,18 @@ func Kesz() {
 	}
 
 	fmt.Println(obj)
+}
+
+func PubSubTry() {
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
+	// rdb.Publish(context.TODO(), "chkanau", "Hello World")
+
+	pubsub := rdb.Subscribe(context.TODO(), "kanau")
+	defer pubsub.Close()
+
+	for msg := range pubsub.Channel() {
+		fmt.Println(msg.Channel, msg.Payload)
+	}
 }

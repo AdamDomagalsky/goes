@@ -2,69 +2,55 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	jejdis "goes/worker/cache"
+	"log"
+	"math/rand"
 	"time"
 
-	"github.com/AdamDomagalsky/goes/bank/proto/pb"
 	"github.com/redis/go-redis/v9"
-	"google.golang.org/protobuf/proto"
 )
 
-func protoTest() {
-	// https://gist.github.com/miguelmota/25568433ad8cfddb5ea556a5644c9fde
-	userb4 := &pb.User{
-		Username:          "test",
-		Fullname:          "test",
-		Email:             "test",
-		PasswordChangedAt: nil,
-		CreatedAt:         nil,
-	}
-	data, _ := proto.Marshal(userb4)
-	// require.NoError(t, err)
-	fmt.Println(data)
-	userAfter := &pb.User{}
-	_ = proto.Unmarshal(data, userAfter)
-	// require.NoError(t, err)
-	// require.True(t, proto.Equal(userb4, userAfter))
+type Task struct {
+	ID   string `json:"id"`
+	BODY string `json:"body"`
 }
 
-func getTest() {
-	ctx := context.Background()
+// {\"id\": \"3\",\"body\":\"this is body\"}
+func main() {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Addr: "localhost:6379",
 	})
+	ctx := context.Background()
 
 	for {
-
-		err := rdb.Set(ctx, "key_kluczyk", "value_siemandero", 0).Err()
+		x := rand.Intn(3) + 1
+		time.Sleep(time.Second * time.Duration(x))
+		taskJSON, err := rdb.RPop(ctx, "task_queue").Result()
 		if err != nil {
-			panic(err)
+			log.Printf("(%vs)Error dequeuing task: %v", x, err)
+			continue // Retry dequeuing on error
 		}
 
-		val, err := rdb.Get(ctx, "key_kluczyk").Result()
-		if err != nil {
-			panic(err)
+		fmt.Println(taskJSON)
+		var task Task
+		if err := json.Unmarshal([]byte(taskJSON), &task); err != nil {
+			log.Println("Error unmarshalling task:", err)
+			continue // Retry unmarshalling on error
 		}
-		fmt.Println("key", val)
+		fmt.Println(task.BODY)
 
-		time.Sleep(time.Millisecond * 2)
-
-		val2, err := rdb.Get(ctx, "key2").Result()
-		if err == redis.Nil {
-			fmt.Println("key2 does not exist")
-		} else if err != nil {
-			panic(err)
+		// Process the task
+		err = func() error {
+			// Do something with task
+			return nil
+		}()
+		if err != nil {
+			log.Println("Error processing task:", err)
+			log.Println("retry TODO")
 		} else {
-			fmt.Println("key2", val2)
+			// Acknowledge successful task completion by removing it from the tracking hash
+			// rdb.HDel(ctx, "task_hash", task.ID)
 		}
-
 	}
-}
-
-func main() {
-	jejdis.Kesz()
-
 }

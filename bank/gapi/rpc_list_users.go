@@ -11,6 +11,7 @@ import (
 )
 
 func (server *Server) ListUsers(ctx context.Context, _ *emptypb.Empty) (*pb.ListUsersResponse, error) {
+	// echo "GET http://localhost:2138/v1/list_users" | vegeta attack -duration=5s | tee results2.bin | vegeta report
 	listUserProtoResp := &pb.ListUsersResponse{}
 	const redisKey = "users:ALL"
 

@@ -49,3 +49,29 @@ It's worth noting that there are other cache patterns as well, including:
 - **Write-Through with Write-Behind**: This pattern combines elements of Write-Through and Write-Behind caching, providing a balance between write performance and data consistency.
 
 The choice of cache pattern depends on your application's specific requirements, data access patterns, and performance considerations. Cache-Aside is commonly used because it's straightforward and provides a good balance between control and performance. However, for more complex scenarios, other cache patterns may be more suitable.
+
+
+
+
+
+
+---
+
+
+##### Redis ***Streams***
+
+TL;DR persistence, ack, at-least-once, consumer, immutable log
+
+##### Redis ***Pub\/Sub*** is an:
+
+TL;DR no persistence, no ack, real-time, low latency, high throughput, at-most-once
+
+- **at-most-once** messaging system that allows publishers to broadcast messages to one or more channels. More precisely, Redis Pub/Sub is designed for real-time communication between instances where low latency is of the utmost importance, and as such doesn’t feature any form of persistence or acknowledgment. The result is the leanest possible real-time messaging system, perfect for financial and gaming applications, where every millisecond matters.
+
+- is an extremely lightweight messaging protocol designed for broadcasting live notifications within a system. It’s ideal for propagating short-lived messages when low latency and huge throughput are critical.
+
+**Message queue** = mutable state, push, deleted after successfully read/processed
+**Event stream** = immutable state, pull, log of events, never deleted (eventually trimmed, cold stored or remove)
+
+src: [Task Queue vs Event Stream](https://redis.com/solutions/use-cases/messaging/)
+
