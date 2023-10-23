@@ -9,7 +9,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/test
+  path: ./k8s/infrastructure/test
   prune: true
   wait: true
   timeout: 5m

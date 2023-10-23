@@ -4,4 +4,4 @@ metadata:
   name: podinfo-team
   namespace: podinfo
 spec:
-  path: ./test
+  path: ./k8s/test
