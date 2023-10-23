@@ -1,0 +1,9 @@
+# https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/1abc9bb0fffdcef0967710a4903e1bd55e1359d1/helm/aws-load-balancer-controller/values.yaml#L4
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  name: aws-load-balancer-controller 
+
+clusterName: polygon
+namespace: kube-system
