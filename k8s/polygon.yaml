@@ -1,0 +1,36 @@
+# eksctl create cluster -f polygon.yaml
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: polygon
+  region: us-east-1
+
+
+nodeGroups:
+  - name: standard-workers
+    instanceType: t3.medium
+    desiredCapacity: 3
+    minSize: 1
+    maxSize: 3
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    wellKnownPolicies:
+      awsLoadBalancerController: true
+
+
+gitops:
+  flux:
+    gitProvider: git       # required. options are github, gitlab or git
+    flags:                 # required. arbitrary map[string]string for all flux args.
+      url: https://github.com/AdamDomagalsky/goes.git
+      username: AdamDomagalsky
+      password: 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
+      branch: infra-2137-cluster-setup
+      namespace: flux-system
+      path: clusters/test
