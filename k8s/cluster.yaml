@@ -1,0 +1,37 @@
+# eksctl create cluster -f polygon.yaml
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: test
+  region: us-east-1
+
+
+nodeGroups:
+  - name: standard-workers-2
+    instanceType: t3.medium
+    desiredCapacity: 3
+    minSize: 1
+    maxSize: 3
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    wellKnownPolicies:
+      awsLoadBalancerController: true
+    attachPolicyARNs:
+    - arn:aws:iam::753125670256:policy/AWSLoadBalancerControllerIAMPolicy
+    roleOnly: true
+
+# gitops:
+#   flux:
+#     gitProvider: git       # required. options are github, gitlab or git
+#     flags:                 # required. arbitrary map[string]string for all flux args.
+#       url: https://github.com/AdamDomagalsky/flux-eks-gitops-config.git
+#       password: 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
+#       branch: flux-test
+#       namespace: flux-system
+#       path: clusters/test
